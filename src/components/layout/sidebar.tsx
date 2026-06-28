@@ -3,51 +3,43 @@
 import { cn } from "@/lib/utils";
 import { useBranchStore } from "@/hooks/useBranch";
 import {
-  Store,
+  LayoutDashboard,
   ShoppingCart,
-  Package,
-  BarChart3,
+  Users,
   Settings,
   LogOut,
   ChevronLeft,
   ChevronRight,
-  Users,
-  Printer,
-  ChevronDown,
+  Store,
+  SlidersHorizontal,
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { Button } from "../ui/button";
 
 const navItems = [
+  { icon: LayoutDashboard, label: "Dashboard", href: "/" },
   { icon: ShoppingCart, label: "POS", href: "/pos" },
-  { icon: Package, label: "Produk", href: "/products" },
-  { icon: Store, label: "Cabang", href: "/branches" },
-  { icon: BarChart3, label: "Laporan", href: "/reports" },
-];
-
-const settingsSubItems = [
-  { icon: Users, label: "Manajemen User", href: "/users" },
-  { icon: Printer, label: "Pengaturan Struk", href: "/settings/receipt" },
+  { icon: Users, label: "Users", href: "/users" },
+  { icon: Settings, label: "Settings", href: "/settings" },
 ];
 
 export function Sidebar() {
   const [collapsed, setCollapsed] = useState(false);
-  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
   const { activeBranch } = useBranchStore();
   const pathname = usePathname();
   const router = useRouter();
 
-  const isActive = (href: string) => pathname.startsWith(href);
-  const isSettingsActive = settingsSubItems.some((s) => isActive(s.href));
+  const isActive = (href: string) =>
+    href === "/" ? pathname === "/" : pathname.startsWith(href);
 
-  return (
-    <aside
-      className={cn(
-        "flex flex-col bg-card border-r border-border h-screen transition-all duration-300",
-        collapsed ? "w-16" : "w-60"
-      )}
-    >
+  // Close mobile sidebar on route change
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [pathname]);
+
+  const sidebarContent = (
+    <>
       {/* Logo / Header */}
       <div className="flex items-center gap-3 p-4 border-b border-border">
         <div className="w-8 h-8 rounded-lg bg-brand-600 flex items-center justify-center shrink-0">
@@ -81,79 +73,14 @@ export function Sidebar() {
             {!collapsed && <span>{item.label}</span>}
           </button>
         ))}
-
-        {/* Separator */}
-        {!collapsed && (
-          <div className="my-2 border-t border-border" />
-        )}
-
-        {/* Settings dropdown */}
-        <div>
-          <button
-            onClick={() => setSettingsOpen(!settingsOpen)}
-            className={cn(
-              "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors",
-              "hover:bg-accent hover:text-accent-foreground",
-              isSettingsActive
-                ? "bg-accent text-accent-foreground font-medium"
-                : "text-muted-foreground"
-            )}
-          >
-            <Settings className="w-5 h-5 shrink-0" />
-            {!collapsed && (
-              <>
-                <span className="flex-1 text-left">Pengaturan</span>
-                <ChevronDown
-                  className={cn(
-                    "w-4 h-4 transition-transform",
-                    settingsOpen && "rotate-180"
-                  )}
-                />
-              </>
-            )}
-          </button>
-
-          {/* Sub-items (only when expanded) */}
-          {!collapsed && settingsOpen && (
-            <div className="ml-2 mt-1 space-y-1 border-l border-border pl-2">
-              {settingsSubItems.map((item) => (
-                <button
-                  key={item.label}
-                  onClick={() => router.push(item.href)}
-                  className={cn(
-                    "w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors",
-                    "hover:bg-accent hover:text-accent-foreground",
-                    isActive(item.href)
-                      ? "bg-accent text-accent-foreground font-medium"
-                      : "text-muted-foreground"
-                  )}
-                >
-                  <item.icon className="w-4 h-4 shrink-0" />
-                  <span>{item.label}</span>
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
       </nav>
 
       {/* Footer */}
       <div className="p-2 border-t border-border space-y-1">
         <button
-          className={cn(
-            "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors",
-            "hover:bg-accent hover:text-accent-foreground",
-            "text-muted-foreground"
-          )}
-        >
-          <LogOut className="w-5 h-5 shrink-0" />
-          {!collapsed && <span>Keluar</span>}
-        </button>
-
-        <button
           onClick={() => setCollapsed(!collapsed)}
           className={cn(
-            "w-full flex items-center justify-center px-3 py-2 rounded-lg text-sm transition-colors",
+            "hidden lg:flex w-full items-center justify-center px-3 py-2 rounded-lg text-sm transition-colors",
             "hover:bg-accent text-muted-foreground"
           )}
         >
@@ -164,6 +91,46 @@ export function Sidebar() {
           )}
         </button>
       </div>
-    </aside>
+    </>
+  );
+
+  return (
+    <>
+      {/* Mobile overlay */}
+      {mobileOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black/50 lg:hidden"
+          onClick={() => setMobileOpen(false)}
+        />
+      )}
+
+      {/* Mobile hamburger */}
+      <button
+        onClick={() => setMobileOpen(!mobileOpen)}
+        className="fixed top-3 left-3 z-50 flex lg:hidden items-center justify-center w-9 h-9 rounded-lg bg-card border border-border shadow-sm"
+      >
+        <SlidersHorizontal className="w-4 h-4" />
+      </button>
+
+      {/* Desktop sidebar */}
+      <aside
+        className={cn(
+          "hidden lg:flex flex-col bg-card border-r border-border h-screen transition-all duration-300",
+          collapsed ? "w-16" : "w-60"
+        )}
+      >
+        {sidebarContent}
+      </aside>
+
+      {/* Mobile sidebar (slide-over) */}
+      <aside
+        className={cn(
+          "fixed inset-y-0 left-0 z-50 flex flex-col bg-card border-r border-border transition-all duration-300 lg:hidden",
+          mobileOpen ? "w-60 translate-x-0" : "w-60 -translate-x-full"
+        )}
+      >
+        {sidebarContent}
+      </aside>
+    </>
   );
 }
