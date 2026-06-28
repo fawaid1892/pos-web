@@ -13,13 +13,17 @@ export interface Branch {
 // ─── User & Auth ──────────────────────────────────────────────────────────────
 export interface User {
   id: string;
+  username?: string;   // new field, optional for backward compat
+  full_name?: string;  // new field, optional for backward compat
   name: string;
   email: string;
-  role: "admin" | "cashier" | "manager" | "superadmin";
+  role: "admin" | "cashier" | "manager" | "superadmin" | "owner";
   branchId?: string;
+  branch_name?: string;
   avatar?: string;
   phone?: string;
   isActive: boolean;
+  status?: string;
   createdAt: string;
   updatedAt: string;
 }
