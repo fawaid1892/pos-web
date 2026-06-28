@@ -1,37 +1,60 @@
 "use client";
 
 import { useState } from "react";
-import { Search, Package } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { Search, Package, AlertCircle } from "lucide-react";
 import { Input } from "../ui/input";
 import { cn } from "@/lib/utils";
+import { useBranchStore } from "@/hooks/useBranch";
 import type { Product } from "@/types";
 
 interface ProductGridProps {
   onSelectProduct: (product: Product) => void;
 }
 
-// Mock data — TODO: fetch dari API
-const MOCK_PRODUCTS: Product[] = [
-  { id: "p1", sku: "KOP-001", name: "Kopi Hitam", price: 15000, costPrice: 8000, categoryId: "cat-1", unit: "pcs", stock: 100, isActive: true },
-  { id: "p2", sku: "KOP-002", name: "Kopi Susu", price: 20000, costPrice: 12000, categoryId: "cat-1", unit: "pcs", stock: 80, isActive: true },
-  { id: "p3", sku: "TEH-001", name: "Teh Manis", price: 10000, costPrice: 5000, categoryId: "cat-2", unit: "pcs", stock: 120, isActive: true },
-  { id: "p4", sku: "TEH-002", name: "Teh Tarik", price: 18000, costPrice: 10000, categoryId: "cat-2", unit: "pcs", stock: 45, isActive: true },
-  { id: "p5", sku: "SNK-001", name: "Pisang Goreng", price: 12000, costPrice: 6000, categoryId: "cat-3", unit: "porsi", stock: 30, isActive: true },
-  { id: "p6", sku: "SNK-002", name: "Kentang Goreng", price: 15000, costPrice: 8000, categoryId: "cat-3", unit: "porsi", stock: 25, isActive: true },
-  { id: "p7", sku: "MIN-001", name: "Air Mineral", price: 5000, costPrice: 3000, categoryId: "cat-4", unit: "pcs", stock: 200, isActive: true },
-  { id: "p8", sku: "MIN-002", name: "Jus Jeruk", price: 18000, costPrice: 10000, categoryId: "cat-4", unit: "gelas", stock: 40, isActive: true },
-  { id: "p9", sku: "NAS-001", name: "Nasi Goreng", price: 25000, costPrice: 15000, categoryId: "cat-5", unit: "porsi", stock: 20, isActive: true },
-  { id: "p10", sku: "NAS-002", name: "Nasi Ayam", price: 30000, costPrice: 18000, categoryId: "cat-5", unit: "porsi", stock: 15, isActive: true },
-  { id: "p11", sku: "MKN-001", name: "Mie Goreng", price: 15000, costPrice: 8000, categoryId: "cat-6", unit: "porsi", stock: 35, isActive: true },
-  { id: "p12", sku: "MKN-002", name: "Mie Rebus", price: 15000, costPrice: 8000, categoryId: "cat-6", unit: "porsi", stock: 35, isActive: true },
-];
+async function fetchProducts(branchId: string | null): Promise<Product[]> {
+  const params = branchId ? `?branch_id=${branchId}` : "";
+  const res = await fetch(`/api/products${params}`);
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ error: "Failed to fetch products" }));
+    throw new Error(err.error || "Failed to fetch products");
+  }
+  const json = await res.json();
+  const list = json.data ?? json.products ?? json;
+  return Array.isArray(list) ? list : [];
+}
+
+function SkeletonCard() {
+  return (
+    <div className="flex flex-col items-center justify-center p-3 rounded-xl border border-border animate-pulse">
+      <div className="w-12 h-12 rounded-lg bg-muted mb-2" />
+      <div className="h-3 w-16 bg-muted rounded mb-1" />
+      <div className="h-3 w-20 bg-muted rounded" />
+    </div>
+  );
+}
 
 export function ProductGrid({ onSelectProduct }: ProductGridProps) {
   const [search, setSearch] = useState("");
+  const activeBranch = useBranchStore((state) => state.activeBranch);
 
-  const filtered = MOCK_PRODUCTS.filter((p) =>
-    p.name.toLowerCase().includes(search.toLowerCase()) ||
-    p.sku.toLowerCase().includes(search.toLowerCase())
+  const {
+    data: products = [],
+    isLoading,
+    isError,
+    error,
+  } = useQuery({
+    queryKey: ["pos-products", activeBranch?.id],
+    queryFn: () => fetchProducts(activeBranch?.id ?? null),
+    enabled: true,
+    refetchInterval: 30_000,
+  });
+
+  const filtered = products.filter(
+    (p) =>
+      p.name.toLowerCase().includes(search.toLowerCase()) ||
+      p.sku.toLowerCase().includes(search.toLowerCase()) ||
+      (p.barcode && p.barcode.toLowerCase().includes(search.toLowerCase()))
   );
 
   return (
@@ -50,14 +73,47 @@ export function ProductGrid({ onSelectProduct }: ProductGridProps) {
         </div>
       </div>
 
-      {/* Grid */}
+      {/* Content */}
       <div className="flex-1 overflow-y-auto p-4">
-        {filtered.length === 0 ? (
+        {/* Loading state */}
+        {isLoading && (
+          <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <SkeletonCard key={i} />
+            ))}
+          </div>
+        )}
+
+        {/* Error state */}
+        {isError && (
+          <div className="flex flex-col items-center justify-center h-full text-destructive">
+            <div className="flex items-center gap-2 p-4 rounded-xl bg-destructive/10 border border-destructive/20 mb-4">
+              <AlertCircle className="w-5 h-5" />
+              <p className="text-sm font-medium">
+                {error instanceof Error
+                  ? error.message
+                  : "Gagal memuat produk"}
+              </p>
+            </div>
+            <button
+              onClick={() => window.location.reload()}
+              className="text-sm text-brand-600 hover:underline"
+            >
+              Coba lagi
+            </button>
+          </div>
+        )}
+
+        {/* Empty state */}
+        {!isLoading && !isError && filtered.length === 0 && (
           <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
             <Package className="w-12 h-12 mb-2" />
             <p className="text-sm">Produk tidak ditemukan</p>
           </div>
-        ) : (
+        )}
+
+        {/* Grid */}
+        {!isLoading && !isError && filtered.length > 0 && (
           <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
             {filtered.map((product) => (
               <button

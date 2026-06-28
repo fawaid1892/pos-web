@@ -9,11 +9,12 @@ import type { TransactionItem } from "@/types";
 
 interface CartState {
   items: TransactionItem[];
-  discount: number;
+  discountPercent: number;
   tax: number;
 
   // Computed
   subtotal: () => number;
+  discountAmount: () => number;
   total: () => number;
   itemCount: () => number;
 
@@ -22,20 +23,26 @@ interface CartState {
   removeItem: (productId: string) => void;
   updateQuantity: (productId: string, quantity: number) => void;
   clearCart: () => void;
-  setDiscount: (amount: number) => void;
+  setDiscountPercent: (percent: number) => void;
   setTax: (amount: number) => void;
 }
 
 export const useCartStore = create<CartState>((set, get) => ({
   items: [],
-  discount: 0,
+  discountPercent: 0,
   tax: 0,
 
   subtotal: () => get().items.reduce((sum, item) => sum + item.subtotal, 0),
 
+  discountAmount: () => {
+    const subtotal = get().subtotal();
+    const percent = get().discountPercent;
+    return Math.round(subtotal * (percent / 100));
+  },
+
   total: () => {
     const subtotal = get().subtotal();
-    const discount = get().discount;
+    const discount = get().discountAmount();
     const tax = get().tax;
     return subtotal - discount + tax;
   },
@@ -86,8 +93,8 @@ export const useCartStore = create<CartState>((set, get) => ({
     });
   },
 
-  clearCart: () => set({ items: [], discount: 0, tax: 0 }),
+  clearCart: () => set({ items: [], discountPercent: 0, tax: 0 }),
 
-  setDiscount: (amount) => set({ discount: amount }),
+  setDiscountPercent: (percent) => set({ discountPercent: percent }),
   setTax: (amount) => set({ tax: amount }),
 }));

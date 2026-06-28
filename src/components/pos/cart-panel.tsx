@@ -15,7 +15,8 @@ export function CartPanel({ onCheckout }: CartPanelProps) {
     items,
     subtotal,
     total,
-    discount,
+    discountPercent,
+    discountAmount,
     tax,
     itemCount,
     removeItem,
@@ -113,14 +114,14 @@ export function CartPanel({ onCheckout }: CartPanelProps) {
       {items.length > 0 && (
         <div className="border-t border-border p-4 space-y-3">
           <div className="space-y-1.5 text-sm">
-            <div className={cn("flex justify-between", discount > 0 && "text-muted-foreground")}>
+            <div className="flex justify-between">
               <span>Subtotal</span>
               <span>{formatCurrency(subtotal())}</span>
             </div>
-            {discount > 0 && (
+            {discountPercent > 0 && (
               <div className="flex justify-between text-destructive">
-                <span>Diskon</span>
-                <span>-{formatCurrency(discount)}</span>
+                <span>Diskon ({discountPercent}%)</span>
+                <span>-{formatCurrency(discountAmount())}</span>
               </div>
             )}
             {tax > 0 && (
