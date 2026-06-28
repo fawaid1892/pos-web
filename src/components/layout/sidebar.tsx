@@ -5,6 +5,7 @@ import { useBranchStore } from "@/hooks/useBranch";
 import {
   LayoutDashboard,
   ShoppingCart,
+  Package,
   Users,
   Settings,
   LogOut,
@@ -19,6 +20,7 @@ import { usePathname, useRouter } from "next/navigation";
 const navItems = [
   { icon: LayoutDashboard, label: "Dashboard", href: "/" },
   { icon: ShoppingCart, label: "POS", href: "/pos" },
+  { icon: Package, label: "Products", href: "/products" },
   { icon: Users, label: "Users", href: "/users" },
   { icon: Settings, label: "Settings", href: "/settings" },
 ];
