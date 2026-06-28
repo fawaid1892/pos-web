@@ -19,7 +19,7 @@ interface BranchState {
   clearError: () => void;
 }
 
-export const useBranchStore = create<BranchState>((set) => ({
+export const useBranchStore = create<BranchState>((set, get) => ({
   branches: [],
   activeBranch: null,
   isLoading: false,
@@ -70,3 +70,7 @@ export const useBranchStore = create<BranchState>((set) => ({
 
   clearError: () => set({ error: null }),
 }));
+
+// Convenience selectors
+export const useActiveBranchId = () =>
+  useBranchStore((state) => state.activeBranch?.id ?? null);

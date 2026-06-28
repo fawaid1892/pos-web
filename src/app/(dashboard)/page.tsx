@@ -1,5 +1,6 @@
 "use client";
 
+import { useQuery } from "@tanstack/react-query";
 import {
   TrendingUp,
   Receipt,
@@ -10,110 +11,66 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatCurrency } from "@/lib/utils";
+import { useActiveBranchId } from "@/hooks/useBranch";
 
-// ─── Mock Data ─────────────────────────────────────────────────────────────────
+// ─── Helpers ───────────────────────────────────────────────────────────────────
 
-const mockStats = [
-  {
-    label: "Total Revenue (Hari Ini)",
-    value: 12_450_000,
-    change: 18.5,
-    trend: "up" as const,
-    icon: TrendingUp,
-    color: "bg-emerald-500/10 text-emerald-600",
-  },
-  {
-    label: "Total Transaksi",
-    value: 47,
-    change: 12.2,
-    trend: "down" as const,
-    icon: Receipt,
-    color: "bg-blue-500/10 text-blue-600",
-  },
-  {
-    label: "Cabang Aktif",
-    value: 3,
-    change: 0,
-    trend: "neutral" as const,
-    icon: Store,
-    color: "bg-violet-500/10 text-violet-600",
-  },
-  {
-    label: "Stok Menipis",
-    value: 8,
-    change: 33.3,
-    trend: "up" as const,
-    icon: AlertTriangle,
-    color: "bg-amber-500/10 text-amber-600",
-  },
-];
+function formatDate(d: Date): string {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
 
-const salesLast7Days = [
-  { day: "Sen", value: 4_200_000 },
-  { day: "Sel", value: 3_800_000 },
-  { day: "Rab", value: 5_100_000 },
-  { day: "Kam", value: 4_700_000 },
-  { day: "Jum", value: 6_300_000 },
-  { day: "Sab", value: 8_200_000 },
-  { day: "Min", value: 7_500_000 },
-];
+function subDaysFrom(date: Date, days: number): Date {
+  const d = new Date(date);
+  d.setDate(d.getDate() - days);
+  return d;
+}
 
-const maxSales = Math.max(...salesLast7Days.map((d) => d.value));
+// ─── Data Fetching ─────────────────────────────────────────────────────────────
 
-const recentTransactions = [
-  {
-    id: "INV/PST/20250628/A1B2",
-    customer: "Walk-in Customer",
-    total: 245_000,
-    status: "completed",
-    time: "10:45",
-  },
-  {
-    id: "INV/KTA/20250628/C3D4",
-    customer: "Budi Santoso",
-    total: 527_500,
-    status: "completed",
-    time: "10:32",
-  },
-  {
-    id: "INV/PST/20250628/E5F6",
-    customer: "Siti Rahayu",
-    total: 132_000,
-    status: "completed",
-    time: "10:15",
-  },
-  {
-    id: "INV/KTA/20250628/G7H8",
-    customer: "Walk-in Customer",
-    total: 89_500,
-    status: "cancelled",
-    time: "09:58",
-  },
-  {
-    id: "INV/PST/20250628/I9J0",
-    customer: "Ahmad Fauzi",
-    total: 1_250_000,
-    status: "completed",
-    time: "09:30",
-  },
-];
+function useDashboardStats(branchId: string | null) {
+  return useQuery({
+    queryKey: ["dashboard-stats", branchId],
+    queryFn: async () => {
+      const res = await fetch(`/api/dashboard/stats?branch_id=${branchId}`);
+      if (!res.ok) throw new Error("Failed to fetch dashboard stats");
+      return res.json();
+    },
+    enabled: !!branchId,
+    refetchInterval: 30_000, // auto-refresh every 30s
+  });
+}
+
+function useSalesChart(branchId: string | null, start: string, end: string) {
+  return useQuery({
+    queryKey: ["sales-chart", branchId, start, end],
+    queryFn: async () => {
+      const res = await fetch(
+        `/api/dashboard/sales-chart?start=${start}&end=${end}&branch_id=${branchId}`
+      );
+      if (!res.ok) throw new Error("Failed to fetch sales chart");
+      return res.json();
+    },
+    enabled: !!branchId,
+  });
+}
 
 // ─── Stat Card ─────────────────────────────────────────────────────────────────
 
 function StatCard({
   label,
   value,
-  change,
-  trend,
   icon: Icon,
   color,
+  isLoading,
 }: {
   label: string;
   value: number | string;
-  change: number;
-  trend: "up" | "down" | "neutral";
   icon: React.ElementType;
   color: string;
+  isLoading?: boolean;
 }) {
   return (
     <div className="rounded-xl border border-border bg-card p-5 transition-shadow hover:shadow-md">
@@ -121,28 +78,15 @@ function StatCard({
         <div className={cn("rounded-lg p-2.5", color)}>
           <Icon className="h-5 w-5" />
         </div>
-        {trend !== "neutral" && (
-          <span
-            className={cn(
-              "inline-flex items-center gap-0.5 rounded-full px-2 py-0.5 text-xs font-medium",
-              trend === "up"
-                ? "bg-emerald-500/10 text-emerald-600"
-                : "bg-red-500/10 text-red-600"
-            )}
-          >
-            {trend === "up" ? (
-              <ArrowUpRight className="h-3 w-3" />
-            ) : (
-              <ArrowDownRight className="h-3 w-3" />
-            )}
-            {Math.abs(change)}%
-          </span>
-        )}
       </div>
       <div className="mt-3">
-        <p className="text-2xl font-bold tracking-tight">
-          {typeof value === "number" ? formatCurrency(value) : value}
-        </p>
+        {isLoading ? (
+          <div className="h-8 w-24 animate-pulse rounded bg-muted" />
+        ) : (
+          <p className="text-2xl font-bold tracking-tight">
+            {typeof value === "number" ? formatCurrency(value) : value}
+          </p>
+        )}
         <p className="mt-0.5 text-xs text-muted-foreground">{label}</p>
       </div>
     </div>
@@ -151,17 +95,29 @@ function StatCard({
 
 // ─── Sales Chart ───────────────────────────────────────────────────────────────
 
-function SalesChart() {
+function SalesChart({ data }: { data: { date: string; total: number; count: number }[] | undefined }) {
+  if (!data || data.length === 0) {
+    return (
+      <div className="rounded-xl border border-border bg-card p-5">
+        <h3 className="mb-4 text-sm font-semibold">Penjualan 7 Hari Terakhir</h3>
+        <p className="text-sm text-muted-foreground">Belum ada data penjualan</p>
+      </div>
+    );
+  }
+
+  const maxSales = Math.max(...data.map((d) => d.total));
+
   return (
     <div className="rounded-xl border border-border bg-card p-5">
       <h3 className="mb-4 text-sm font-semibold">Penjualan 7 Hari Terakhir</h3>
       <div className="flex items-end gap-3">
-        {salesLast7Days.map((day) => {
-          const heightPct = (day.value / maxSales) * 100;
+        {data.map((day) => {
+          const heightPct = maxSales > 0 ? (day.total / maxSales) * 100 : 0;
+          const shortDate = day.date.slice(5); // "MM-DD"
           return (
-            <div key={day.day} className="flex flex-1 flex-col items-center gap-1.5">
+            <div key={day.date} className="flex flex-1 flex-col items-center gap-1.5">
               <span className="text-[10px] tabular-nums text-muted-foreground">
-                {(day.value / 1_000_000).toFixed(1)}jt
+                {(day.total / 1_000_000).toFixed(1)}jt
               </span>
               <div className="relative flex h-32 w-full items-end">
                 <div
@@ -170,7 +126,7 @@ function SalesChart() {
                 />
               </div>
               <span className="text-[11px] font-medium text-muted-foreground">
-                {day.day}
+                {shortDate}
               </span>
             </div>
           );
@@ -180,63 +136,54 @@ function SalesChart() {
   );
 }
 
-// ─── Recent Transactions ───────────────────────────────────────────────────────
-
-function RecentTransactions() {
-  return (
-    <div className="rounded-xl border border-border bg-card p-5">
-      <div className="mb-4 flex items-center justify-between">
-        <h3 className="text-sm font-semibold">Transaksi Terbaru</h3>
-        <span className="text-xs text-muted-foreground">Hari ini</span>
-      </div>
-      <div className="overflow-x-auto">
-        <table className="w-full text-left text-sm">
-          <thead>
-            <tr className="border-b border-border text-xs text-muted-foreground">
-              <th className="pb-2 font-medium">Invoice</th>
-              <th className="pb-2 font-medium">Pelanggan</th>
-              <th className="pb-2 font-medium">Total</th>
-              <th className="pb-2 font-medium">Status</th>
-              <th className="pb-2 font-medium">Jam</th>
-            </tr>
-          </thead>
-          <tbody>
-            {recentTransactions.map((tx) => (
-              <tr key={tx.id} className="border-b border-border last:border-0">
-                <td className="py-2.5 pr-4 font-mono text-xs text-muted-foreground">
-                  {tx.id}
-                </td>
-                <td className="py-2.5 pr-4">{tx.customer}</td>
-                <td className="py-2.5 pr-4 font-medium tabular-nums">
-                  {formatCurrency(tx.total)}
-                </td>
-                <td className="py-2.5 pr-4">
-                  <span
-                    className={cn(
-                      "inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium",
-                      tx.status === "completed"
-                        ? "bg-emerald-500/10 text-emerald-600"
-                        : "bg-red-500/10 text-red-600"
-                    )}
-                  >
-                    {tx.status === "completed" ? "Selesai" : "Dibatalkan"}
-                  </span>
-                </td>
-                <td className="py-2.5 text-xs text-muted-foreground">
-                  {tx.time}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  );
-}
-
 // ─── Page ──────────────────────────────────────────────────────────────────────
 
 export default function DashboardPage() {
+  const branchId = useActiveBranchId();
+
+  // Date range: last 7 days
+  const today = new Date();
+  const endDate = formatDate(today);
+  const startDate = formatDate(subDaysFrom(today, 6));
+
+  const {
+    data: stats,
+    isLoading: statsLoading,
+    error: statsError,
+  } = useDashboardStats(branchId);
+  const {
+    data: chartData,
+    isLoading: chartLoading,
+    error: chartError,
+  } = useSalesChart(branchId, startDate, endDate);
+
+  const statCards = [
+    {
+      label: "Pendapatan Hari Ini",
+      value: stats?.today_revenue ?? 0,
+      icon: TrendingUp,
+      color: "bg-emerald-500/10 text-emerald-600",
+    },
+    {
+      label: "Total Transaksi",
+      value: stats?.total_transactions ?? 0,
+      icon: Receipt,
+      color: "bg-blue-500/10 text-blue-600",
+    },
+    {
+      label: "Cabang Aktif",
+      value: stats?.active_branches ?? 0,
+      icon: Store,
+      color: "bg-violet-500/10 text-violet-600",
+    },
+    {
+      label: "Stok Menipis",
+      value: stats?.low_stock_items ?? 0,
+      icon: AlertTriangle,
+      color: "bg-amber-500/10 text-amber-600",
+    },
+  ];
+
   return (
     <div className="flex h-full flex-col gap-6 overflow-y-auto p-6">
       {/* Page header */}
@@ -247,20 +194,46 @@ export default function DashboardPage() {
         </p>
       </div>
 
+      {/* Error banner */}
+      {(statsError || chartError) && (
+        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          Gagal memuat data dashboard. Silakan coba lagi.
+        </div>
+      )}
+
       {/* Stat cards */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {mockStats.map((stat) => (
-          <StatCard key={stat.label} {...stat} />
+        {statCards.map((stat) => (
+          <StatCard key={stat.label} {...stat} isLoading={statsLoading} />
         ))}
       </div>
 
-      {/* Chart + Table */}
+      {/* Chart */}
       <div className="grid gap-6 lg:grid-cols-5">
         <div className="lg:col-span-3">
-          <SalesChart />
+          {chartLoading ? (
+            <div className="rounded-xl border border-border bg-card p-5">
+              <h3 className="mb-4 text-sm font-semibold">Penjualan 7 Hari Terakhir</h3>
+              <div className="flex items-end gap-3 h-32">
+                {Array.from({ length: 7 }).map((_, i) => (
+                  <div key={i} className="flex-1 flex flex-col items-center gap-1.5">
+                    <div className="w-full h-24 animate-pulse rounded-t-md bg-muted" />
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <SalesChart data={chartData?.rows} />
+          )}
         </div>
         <div className="lg:col-span-2">
-          <RecentTransactions />
+          {/* Placeholder for future recent transactions widget */}
+          <div className="rounded-xl border border-border bg-card p-5">
+            <h3 className="mb-4 text-sm font-semibold">Informasi</h3>
+            <p className="text-sm text-muted-foreground">
+              Data dashboard diperbarui secara real-time. Pilih cabang untuk melihat data spesifik.
+            </p>
+          </div>
         </div>
       </div>
     </div>
