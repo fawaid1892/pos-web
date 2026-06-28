@@ -118,6 +118,19 @@ export type UserFormData = Omit<User, "id" | "createdAt" | "updatedAt"> & {
 };
 
 // ─── Inventory ────────────────────────────────────────────────────────────────
+export interface InventoryItem {
+  id: string;
+  productId: string;
+  productName: string;
+  barcode?: string;
+  categoryName?: string;
+  stockQty: number;
+  minStock: number;
+  branchId: string;
+  branchName?: string;
+  updatedAt: string;
+}
+
 export interface StockMutation {
   id: string;
   productId: string;
@@ -127,6 +140,21 @@ export interface StockMutation {
   type: "in" | "out" | "transfer" | "adjustment";
   note?: string;
   createdAt: string;
+}
+
+export interface AdjustmentFormData {
+  productId: string;
+  type: "in" | "out";
+  quantity: number;
+  notes?: string;
+}
+
+export interface TransferFormData {
+  productId: string;
+  fromBranchId: string;
+  toBranchId: string;
+  quantity: number;
+  notes?: string;
 }
 
 // ─── API Response ─────────────────────────────────────────────────────────────
