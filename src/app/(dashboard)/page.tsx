@@ -39,7 +39,7 @@ function useDashboardStats(branchId: string | null) {
       return res.json();
     },
     enabled: !!branchId,
-    refetchInterval: 30_000, // auto-refresh every 30s
+    refetchInterval: 60_000, // auto-refresh every 60s (real-time via WS)
   });
 }
 
