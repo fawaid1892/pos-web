@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react";
-import { X, CheckCircle, Printer, Loader } from "lucide-react";
+import { useState, useEffect } from "react";
+import { X, CheckCircle, Printer, Loader, Percent, Ticket } from "lucide-react";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { useCartStore } from "@/hooks/useCart";
 import { useBranchStore } from "@/hooks/useBranch";
 import { formatCurrency, generateInvoice } from "@/lib/utils";
+import type { Promotion } from "@/types";
 
 interface CheckoutModalProps {
   isOpen: boolean;
@@ -23,7 +24,7 @@ const paymentMethods: { value: PaymentMethod; label: string }[] = [
 ];
 
 export function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
-  const { items, total, subtotal, discountPercent, setDiscountPercent, clearCart } = useCartStore();
+  const { items, total, subtotal, discountPercent, setDiscountPercent, clearCart, voucherInfo, setVoucherDiscount, clearVoucher } = useCartStore();
   const activeBranch = useBranchStore((state) => state.activeBranch);
   const [customerName, setCustomerName] = useState("");
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("cash");
@@ -33,9 +34,90 @@ export function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
   const [step, setStep] = useState<"payment" | "success">("payment");
   const [invoiceNumber, setInvoiceNumber] = useState("");
 
+  // Voucher state
+  const [voucherCode, setVoucherCode] = useState("");
+  const [isValidatingVoucher, setIsValidatingVoucher] = useState(false);
+  const [voucherError, setVoucherError] = useState<string | null>(null);
+
+  // Active promotions
+  const [activePromotions, setActivePromotions] = useState<Promotion[]>([]);
+  const [loadingPromotions, setLoadingPromotions] = useState(false);
+
+  // Fetch active promotions
+  useEffect(() => {
+    if (!isOpen) return;
+    async function fetchActivePromotions() {
+      setLoadingPromotions(true);
+      try {
+        const res = await fetch("/api/promotions/active");
+        if (res.ok) {
+          const json = await res.json();
+          const data = json?.data ?? json ?? [];
+          setActivePromotions(Array.isArray(data) ? data : []);
+        }
+      } catch {
+        // Silently fail - promotions are optional
+      } finally {
+        setLoadingPromotions(false);
+      }
+    }
+    fetchActivePromotions();
+  }, [isOpen]);
+
+  // Reset voucher input when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      setVoucherCode("");
+      setVoucherError(null);
+    }
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
   const changeAmount = Math.max(0, (Number(paymentAmount) || 0) - total());
+
+  const handleValidateVoucher = async () => {
+    const code = voucherCode.trim();
+    if (!code) return;
+
+    setIsValidatingVoucher(true);
+    setVoucherError(null);
+
+    try {
+      const res = await fetch("/api/promotions/validate-voucher", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code }),
+      });
+
+      const json = await res.json();
+      const data = json?.data ?? json;
+
+      if (!res.ok || !data?.valid) {
+        setVoucherError(data?.error || "Kode voucher tidak valid");
+        clearVoucher();
+        return;
+      }
+
+      setVoucherDiscount({
+        code,
+        name: data.promotion_name || code,
+        value: data.discount_value || 0,
+        type: data.discount_type || "nominal",
+      });
+    } catch {
+      setVoucherError("Gagal memvalidasi voucher. Periksa koneksi.");
+      clearVoucher();
+    } finally {
+      setIsValidatingVoucher(false);
+    }
+  };
+
+  const handleRemoveVoucher = () => {
+    clearVoucher();
+    setVoucherCode("");
+    setVoucherError(null);
+  };
 
   const handlePay = async () => {
     setIsSubmitting(true);
@@ -53,6 +135,7 @@ export function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
         cash_amount: paymentMethod === "cash" ? Number(paymentAmount) || total() : total(),
         customer_name: customerName.trim() || undefined,
         discount_percent: discountPercent,
+        voucher_code: voucherInfo?.code || undefined,
       };
 
       const res = await fetch("/api/transactions/checkout", {
@@ -84,6 +167,9 @@ export function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
     setCustomerName("");
     setDiscountPercent(0);
     setSubmitError(null);
+    setVoucherCode("");
+    setVoucherError(null);
+    clearVoucher();
     onClose();
   };
 
@@ -155,9 +241,9 @@ export function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
 
   return (
     <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
-      <div className="bg-background rounded-2xl w-full max-w-md">
+      <div className="bg-background rounded-2xl w-full max-w-md max-h-[90vh] flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-border">
+        <div className="flex items-center justify-between p-4 border-b border-border shrink-0">
           <h2 className="text-lg font-bold">Pembayaran</h2>
           <button
             onClick={handleClose}
@@ -168,8 +254,8 @@ export function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
           </button>
         </div>
 
-        {/* Content */}
-        <div className="p-4 space-y-4">
+        {/* Scrollable Content */}
+        <div className="p-4 space-y-4 overflow-y-auto flex-1">
           {/* Customer Name */}
           <Input
             label="Nama Pelanggan (opsional)"
@@ -191,6 +277,112 @@ export function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
             onChange={(e) => setDiscountPercent(Math.max(0, Math.min(100, Number(e.target.value) || 0)))}
             disabled={isSubmitting}
           />
+
+          {/* ─── Active Promotions ─────────────────────────────────── */}
+          <div>
+            <label className="text-sm font-medium mb-2 flex items-center gap-1.5">
+              <Percent className="w-4 h-4" />
+              Promosi Aktif
+            </label>
+            {loadingPromotions ? (
+              <div className="flex items-center gap-2 text-sm text-muted-foreground py-2">
+                <Loader className="w-4 h-4 animate-spin" />
+                Memuat promosi...
+              </div>
+            ) : activePromotions.length === 0 ? (
+              <p className="text-sm text-muted-foreground py-2">
+                Tidak ada promosi aktif saat ini
+              </p>
+            ) : (
+              <div className="space-y-2">
+                {activePromotions.slice(0, 3).map((promo) => (
+                  <div
+                    key={promo.id}
+                    className="flex items-center gap-2 p-2.5 rounded-lg bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 text-sm"
+                  >
+                    <Ticket className="w-4 h-4 text-blue-600 shrink-0" />
+                    <span className="text-blue-700 dark:text-blue-300 flex-1">
+                      {promo.name}
+                    </span>
+                    <span className="text-xs font-medium text-blue-600 dark:text-blue-400">
+                      {promo.discount_type === "persen"
+                        ? `${promo.discount_value}%`
+                        : formatCurrency(promo.discount_value)}
+                    </span>
+                  </div>
+                ))}
+                {activePromotions.length > 3 && (
+                  <p className="text-xs text-muted-foreground text-center">
+                    +{activePromotions.length - 3} promosi lainnya
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* ─── Voucher Code ─────────────────────────────────────── */}
+          <div>
+            <label className="text-sm font-medium mb-1.5 block">
+              Kode Voucher
+            </label>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                placeholder="Masukkan kode voucher..."
+                value={voucherCode}
+                onChange={(e) => {
+                  setVoucherCode(e.target.value);
+                  if (voucherError) setVoucherError(null);
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") handleValidateVoucher();
+                }}
+                disabled={isSubmitting || isValidatingVoucher || !!voucherInfo}
+                className="flex-1 h-10 rounded-lg border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+              />
+              {voucherInfo ? (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleRemoveVoucher}
+                  className="shrink-0 text-destructive hover:text-destructive"
+                  disabled={isSubmitting}
+                >
+                  <X className="w-4 h-4" />
+                </Button>
+              ) : (
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={handleValidateVoucher}
+                  loading={isValidatingVoucher}
+                  disabled={!voucherCode.trim() || isSubmitting}
+                  className="shrink-0"
+                >
+                  Cek
+                </Button>
+              )}
+            </div>
+
+            {/* Voucher result */}
+            {voucherInfo && (
+              <div className="mt-2 p-2.5 rounded-lg bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 flex items-center gap-2 text-sm">
+                <CheckCircle className="w-4 h-4 text-green-600 shrink-0" />
+                <span className="text-green-700 dark:text-green-300 flex-1">
+                  {voucherInfo.name}
+                </span>
+                <span className="text-xs font-medium text-green-700 dark:text-green-300">
+                  Diskon: {voucherInfo.type === "persen"
+                    ? `${voucherInfo.value}%`
+                    : formatCurrency(voucherInfo.value)}
+                </span>
+              </div>
+            )}
+
+            {voucherError && (
+              <p className="mt-1 text-xs text-destructive">{voucherError}</p>
+            )}
+          </div>
 
           {/* Payment Methods */}
           <div>
@@ -223,7 +415,16 @@ export function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
             </p>
             {discountPercent > 0 && (
               <p className="text-xs text-muted-foreground mt-1">
-                Diskon {discountPercent}% (hemat {formatCurrency(subtotal() - total())})
+                Diskon {discountPercent}% (hemat {formatCurrency(subtotal() - (subtotal() * discountPercent / 100))})
+              </p>
+            )}
+            {voucherInfo && (
+              <p className="text-xs text-green-600 mt-0.5">
+                Voucher: hemat {formatCurrency(
+                  voucherInfo.type === "persen"
+                    ? Math.round(subtotal() * (voucherInfo.value / 100))
+                    : voucherInfo.value
+                )}
               </p>
             )}
           </div>
@@ -259,7 +460,7 @@ export function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
         </div>
 
         {/* Actions */}
-        <div className="p-4 border-t border-border flex gap-3">
+        <div className="p-4 border-t border-border flex gap-3 shrink-0">
           <Button
             variant="outline"
             className="flex-1"

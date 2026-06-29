@@ -36,7 +36,8 @@ export default function ProductListPage() {
   const filtered = products.filter(
     (p) =>
       (p.name || "").toLowerCase().includes(search.toLowerCase()) ||
-      (p.barcode || "").toLowerCase().includes(search.toLowerCase())
+      (p.barcode || "").toLowerCase().includes(search.toLowerCase()) ||
+      (p.sku || "").toLowerCase().includes(search.toLowerCase())
   );
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / ITEMS_PER_PAGE));
@@ -135,7 +136,9 @@ export default function ProductListPage() {
             <thead>
               <tr className="border-b border-border text-xs font-medium text-muted-foreground uppercase tracking-wider">
                 <th className="text-left px-6 py-3">Nama</th>
-                <th className="text-left px-6 py-3 hidden sm:table-cell">Barcode</th>
+                <th className="text-left px-6 py-3 hidden sm:table-cell">Satuan</th>
+                <th className="text-left px-6 py-3 hidden md:table-cell">Barcode</th>
+                <th className="text-left px-6 py-3 hidden lg:table-cell">Kode/SKU</th>
                 <th className="text-left px-6 py-3">Harga</th>
                 <th className="text-left px-6 py-3 hidden md:table-cell">Harga Modal</th>
                 <th className="text-left px-6 py-3 hidden lg:table-cell">Kategori</th>
@@ -152,8 +155,16 @@ export default function ProductListPage() {
                   <td className="px-6 py-4">
                     <p className="font-medium text-sm">{product.name}</p>
                   </td>
-                  <td className="px-6 py-4 text-sm text-muted-foreground hidden sm:table-cell font-mono">
+                  <td className="px-6 py-4 text-sm hidden sm:table-cell">
+                    <span className="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary">
+                      {product.unit || "—"}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 text-sm text-muted-foreground hidden md:table-cell font-mono">
                     {product.barcode || "—"}
+                  </td>
+                  <td className="px-6 py-4 text-sm text-muted-foreground hidden lg:table-cell font-mono">
+                    {product.sku || "—"}
                   </td>
                   <td className="px-6 py-4 text-sm font-medium">
                     {formatCurrency(product.price)}

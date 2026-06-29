@@ -5,9 +5,21 @@ export interface Branch {
   code: string;
   address: string;
   phone?: string;
+  province?: string;
+  city?: string;
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface BranchFormData {
+  name: string;
+  code: string;
+  address: string;
+  phone?: string;
+  province?: string;
+  city?: string;
+  isActive: boolean;
 }
 
 // ─── User & Auth ──────────────────────────────────────────────────────────────
@@ -170,6 +182,51 @@ export interface PaginatedResponse<T> extends ApiResponse<T[]> {
   page: number;
   limit: number;
   totalPages: number;
+}
+
+// ─── Promotion ───────────────────────────────────────────────────────────────
+export interface Promotion {
+  id: string;
+  name: string;
+  type: 'voucher' | 'bundling' | 'potongan_harga' | 'buy_x_get_y' | 'min_purchase';
+  code?: string;
+  discount_value: number;
+  discount_type: 'persen' | 'nominal';
+  sku_target?: string;
+  qty_min: number;
+  qty_free: number;
+  start_date: string;
+  end_date: string;
+  branch_id?: string;
+  is_active: boolean;
+  max_uses: number;
+  current_uses: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface PromotionFormData {
+  name: string;
+  type: string;
+  code?: string;
+  discount_value: number;
+  discount_type: string;
+  sku_target?: string;
+  qty_min: number;
+  qty_free: number;
+  start_date: string;
+  end_date: string;
+  branch_id?: string;
+  is_active: boolean;
+  max_uses: number;
+}
+
+export interface ValidateVoucherResponse {
+  valid: boolean;
+  discount_value?: number;
+  discount_type?: string;
+  promotion_name?: string;
+  error?: string;
 }
 
 // ─── Role & Permission ─────────────────────────────────────────────────────────

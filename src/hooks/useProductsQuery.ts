@@ -8,6 +8,8 @@ import type { Product, Category } from "@/types";
 export interface ProductFormData {
   name: string;
   barcode?: string;
+  code?: string;
+  unit: string;
   price: number;
   cost_price?: number;
   category_id?: string;

@@ -11,10 +11,13 @@ interface CartState {
   items: TransactionItem[];
   discountPercent: number;
   tax: number;
+  voucherDiscount: number;
+  voucherInfo: { code: string; name: string; value: number; type: string } | null;
 
   // Computed
   subtotal: () => number;
   discountAmount: () => number;
+  voucherDiscountAmount: () => number;
   total: () => number;
   itemCount: () => number;
 
@@ -25,12 +28,16 @@ interface CartState {
   clearCart: () => void;
   setDiscountPercent: (percent: number) => void;
   setTax: (amount: number) => void;
+  setVoucherDiscount: (voucher: { code: string; name: string; value: number; type: string } | null) => void;
+  clearVoucher: () => void;
 }
 
 export const useCartStore = create<CartState>((set, get) => ({
   items: [],
   discountPercent: 0,
   tax: 0,
+  voucherDiscount: 0,
+  voucherInfo: null,
 
   subtotal: () => get().items.reduce((sum, item) => sum + item.subtotal, 0),
 
@@ -40,11 +47,16 @@ export const useCartStore = create<CartState>((set, get) => ({
     return Math.round(subtotal * (percent / 100));
   },
 
+  voucherDiscountAmount: () => {
+    return get().voucherDiscount;
+  },
+
   total: () => {
     const subtotal = get().subtotal();
     const discount = get().discountAmount();
+    const voucher = get().voucherDiscount;
     const tax = get().tax;
-    return subtotal - discount + tax;
+    return subtotal - discount - voucher + tax;
   },
 
   itemCount: () => get().items.reduce((sum, item) => sum + item.quantity, 0),
@@ -93,8 +105,25 @@ export const useCartStore = create<CartState>((set, get) => ({
     });
   },
 
-  clearCart: () => set({ items: [], discountPercent: 0, tax: 0 }),
+  clearCart: () => set({ items: [], discountPercent: 0, tax: 0, voucherDiscount: 0, voucherInfo: null }),
 
   setDiscountPercent: (percent) => set({ discountPercent: percent }),
   setTax: (amount) => set({ tax: amount }),
+
+  setVoucherDiscount: (voucher) => {
+    if (!voucher) {
+      set({ voucherDiscount: 0, voucherInfo: null });
+      return;
+    }
+    const subtotal = get().subtotal();
+    let discountValue = 0;
+    if (voucher.type === 'persen') {
+      discountValue = Math.round(subtotal * (voucher.value / 100));
+    } else {
+      discountValue = voucher.value;
+    }
+    set({ voucherDiscount: discountValue, voucherInfo: voucher });
+  },
+
+  clearVoucher: () => set({ voucherDiscount: 0, voucherInfo: null }),
 }));

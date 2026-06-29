@@ -7,9 +7,15 @@ import { useCategories, useCreateProduct, useUpdateProduct } from "@/hooks/usePr
 import type { Product } from "@/types";
 import { X } from "lucide-react";
 
+const UNIT_OPTIONS = [
+  "PCS", "CUP", "KG", "GRAM", "ML", "LITER", "BOTOL", "PAX", "PAKET", "METER",
+] as const;
+
 interface FormFields {
   name: string;
   barcode: string;
+  code: string;
+  unit: string;
   price: string;
   cost_price: string;
   category_id: string;
@@ -40,6 +46,8 @@ export function ProductFormModal({
   const [form, setForm] = useState<FormFields>({
     name: "",
     barcode: "",
+    code: "",
+    unit: "PCS",
     price: "",
     cost_price: "",
     category_id: "",
@@ -52,6 +60,8 @@ export function ProductFormModal({
       setForm({
         name: product.name || "",
         barcode: product.barcode || "",
+        code: product.sku || "",
+        unit: product.unit || "PCS",
         price: String(product.price ?? ""),
         cost_price: String(product.costPrice ?? ""),
         category_id: product.categoryId || "",
@@ -61,6 +71,8 @@ export function ProductFormModal({
       setForm({
         name: "",
         barcode: "",
+        code: "",
+        unit: "PCS",
         price: "",
         cost_price: "",
         category_id: "",
@@ -87,6 +99,8 @@ export function ProductFormModal({
     const payload: Record<string, unknown> = {
       name: form.name.trim(),
       barcode: form.barcode.trim() || undefined,
+      code: form.code.trim() || undefined,
+      unit: form.unit || "PCS",
       price: Number(form.price),
       cost_price: form.cost_price ? Number(form.cost_price) : undefined,
       category_id: form.category_id || undefined,
@@ -131,15 +145,43 @@ export function ProductFormModal({
         error={errors.name}
       />
 
-      {/* Barcode */}
+      {/* Kode Barang (SKU) */}
+      <Input
+        id="code"
+        label="Kode Barang (SKU)"
+        placeholder="Kosongkan untuk auto-generate"
+        value={form.code}
+        onChange={(e) => updateField("code", e.target.value)}
+        error={errors.code}
+      />
+
+      {/* Barcode (opsional) */}
       <Input
         id="barcode"
-        label="Barcode"
-        placeholder="Masukkan barcode (opsional)"
+        label="Barcode (opsional)"
+        placeholder="Masukkan barcode"
         value={form.barcode}
         onChange={(e) => updateField("barcode", e.target.value)}
         error={errors.barcode}
       />
+
+      {/* Satuan */}
+      <div className="w-full">
+        <label className="block text-sm font-medium text-foreground mb-1.5">
+          Satuan
+        </label>
+        <select
+          value={form.unit}
+          onChange={(e) => updateField("unit", e.target.value)}
+          className="flex h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        >
+          {UNIT_OPTIONS.map((unit) => (
+            <option key={unit} value={unit}>
+              {unit}
+            </option>
+          ))}
+        </select>
+      </div>
 
       {/* Price & Cost Price */}
       <div className="grid grid-cols-2 gap-4">

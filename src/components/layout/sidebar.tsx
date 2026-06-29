@@ -15,6 +15,8 @@ import {
   Sliders,
   BarChart,
   Activity,
+  Building2,
+  Percent,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
@@ -22,9 +24,11 @@ import { useAuthStore } from "@/hooks/useAuth";
 
 const navItems = [
   { icon: Layout, label: "Dashboard", href: "/" },
+  { icon: Building2, label: "Branches", href: "/branches" },
   { icon: ShoppingCart, label: "POS", href: "/pos" },
   { icon: Package, label: "Products", href: "/products" },
   { icon: Package, label: "Stock", href: "/stock" },
+  { icon: Percent, label: "Promosi", href: "/promotions" },
   { icon: BarChart, label: "Reports", href: "/reports" },
   { icon: Users, label: "Users", href: "/users" },
   { icon: Activity, label: "Roles", href: "/roles" },
