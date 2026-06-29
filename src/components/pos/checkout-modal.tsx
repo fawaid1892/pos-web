@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { X, CheckCircle, Printer, Loader2 } from "lucide-react";
+import { X, CheckCircle, Printer, Loader } from "lucide-react";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { useCartStore } from "@/hooks/useCart";

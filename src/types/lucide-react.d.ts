@@ -41,6 +41,6 @@ declare module "lucide-react" {
   export const FileText: FC<SVGProps<SVGSVGElement>>;
   export const Image: FC<SVGProps<SVGSVGElement>>;
   export const Calendar: FC<SVGProps<SVGSVGElement>>;
-  export const Loader2: FC<SVGProps<SVGSVGElement>>;
+  export const Loader: FC<SVGProps<SVGSVGElement>>;
   export const Save: FC<SVGProps<SVGSVGElement>>;
 }
