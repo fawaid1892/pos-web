@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 const BASE_URL = process.env.BACKEND_API_URL || process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8080";
+const API_BASE = BASE_URL.replace(/\/+$/, "");
 
 export async function GET(request: NextRequest) {
   try {
@@ -13,8 +14,8 @@ export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams;
     const queryString = searchParams.toString();
     const url = queryString
-      ? `${BASE_URL}/api/v1/settings?${queryString}`
-      : `${BASE_URL}/api/v1/settings`;
+      ? `${API_BASE}/api/v1/settings?${queryString}`
+      : `${API_BASE}/api/v1/settings`;
 
     const res = await fetch(url, {
       headers,
@@ -54,7 +55,7 @@ export async function PUT(request: NextRequest) {
 
     // Try to proxy to backend
     try {
-      const res = await fetch(`${BASE_URL}/api/v1/settings`, {
+      const res = await fetch(`${API_BASE}/api/v1/settings`, {
         method: "PUT",
         headers,
         body: JSON.stringify(body),

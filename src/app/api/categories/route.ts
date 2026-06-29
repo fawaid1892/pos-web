@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 const BASE_URL = process.env.BACKEND_API_URL || process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8080";
+const API_BASE = BASE_URL.replace(/\/+$/, "");
 
 export async function GET(request: NextRequest) {
   try {
@@ -13,8 +14,8 @@ export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams;
     const queryString = searchParams.toString();
     const url = queryString
-      ? `${BASE_URL}/api/v1/categories?${queryString}`
-      : `${BASE_URL}/api/v1/categories`;
+      ? `${API_BASE}/api/v1/categories?${queryString}`
+      : `${API_BASE}/api/v1/categories`;
 
     const res = await fetch(url, {
       headers,

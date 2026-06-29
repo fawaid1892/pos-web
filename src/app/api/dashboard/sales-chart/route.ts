@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 const BASE_URL = process.env.BACKEND_API_URL || process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8080";
+const API_BASE = BASE_URL.replace(/\/+$/, "");
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
@@ -13,7 +14,7 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const url = `${BASE_URL}/api/v1/dashboard/sales-chart?start=${start}&end=${end}&branch_id=${branchId}`;
+    const url = `${API_BASE}/api/v1/dashboard/sales-chart?start=${start}&end=${end}&branch_id=${branchId}`;
 
     const token = request.cookies.get("auth_token")?.value;
     const headers: Record<string, string> = {
