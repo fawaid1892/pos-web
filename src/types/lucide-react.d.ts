@@ -24,6 +24,7 @@ declare module "lucide-react" {
   export const Eye: FC<SVGProps<SVGSVGElement>>;
   export const EyeOff: FC<SVGProps<SVGSVGElement>>;
   export const FileText: FC<SVGProps<SVGSVGElement>>;
+  export const Globe: FC<SVGProps<SVGSVGElement>>;
   export const Filter: FC<SVGProps<SVGSVGElement>>;
   export const Home: FC<SVGProps<SVGSVGElement>>;
   export const Image: FC<SVGProps<SVGSVGElement>>;
@@ -51,6 +52,7 @@ declare module "lucide-react" {
   export const Trash2: FC<SVGProps<SVGSVGElement>>;
   export const Upload: FC<SVGProps<SVGSVGElement>>;
   export const Building2: FC<SVGProps<SVGSVGElement>>;
+  export const Calendar: FC<SVGProps<SVGSVGElement>>;
   export const Percent: FC<SVGProps<SVGSVGElement>>;
   export const Ticket: FC<SVGProps<SVGSVGElement>>;
   export const UserPlus: FC<SVGProps<SVGSVGElement>>;

@@ -5,12 +5,29 @@ import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn, formatDate } from "@/lib/utils";
+import type { Branch } from "@/types";
 import {
   ArrowLeft,
   Save,
   Trash2,
   Percent,
+  Globe,
+  MapPinned,
+  Building2,
+  CheckCircle,
+  Check,
 } from "lucide-react";
+
+// ─── Provinsi/Kota types ──────────────────────────────────────────────────────
+interface Province {
+  id: string;
+  name: string;
+}
+
+interface City {
+  id: string;
+  name: string;
+}
 
 const PROMOTION_TYPES = [
   { value: "voucher", label: "Voucher" },
@@ -25,6 +42,13 @@ const DISCOUNT_TYPES = [
   { value: "nominal", label: "Nominal (Rp)" },
 ];
 
+const SCOPE_OPTIONS = [
+  { value: "all", label: "Semua Cabang", icon: Globe },
+  { value: "province", label: "By Provinsi", icon: MapPinned },
+  { value: "city", label: "By Kota", icon: Building2 },
+  { value: "selected", label: "Pilih Cabang", icon: CheckCircle },
+];
+
 interface FormData {
   name: string;
   type: string;
@@ -36,7 +60,10 @@ interface FormData {
   qty_free: number;
   start_date: string;
   end_date: string;
-  branch_id: string;
+  scope: string;
+  province_id: string;
+  city_id: string;
+  branch_ids: string[];
   is_active: boolean;
   max_uses: number;
 }
@@ -52,7 +79,10 @@ const DEFAULT_FORM: FormData = {
   qty_free: 0,
   start_date: "",
   end_date: "",
-  branch_id: "",
+  scope: "all",
+  province_id: "",
+  city_id: "",
+  branch_ids: [],
   is_active: true,
   max_uses: 0,
 };
@@ -69,6 +99,76 @@ export default function PromotionDetailPage() {
   const [formError, setFormError] = useState<string | null>(null);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+
+  // ─── Scope-related state ───────────────────────────────────────────────────
+  const [provinces, setProvinces] = useState<Province[]>([]);
+  const [cities, setCities] = useState<City[]>([]);
+  const [branches, setBranches] = useState<Branch[]>([]);
+  const [loadingProvince, setLoadingProvince] = useState(false);
+  const [loadingCity, setLoadingCity] = useState(false);
+  const [loadingBranches, setLoadingBranches] = useState(false);
+
+  // ─── Fetch provinces on mount ──────────────────────────────────────────────
+  useEffect(() => {
+    async function loadProvinces() {
+      setLoadingProvince(true);
+      try {
+        const res = await fetch(
+          "https://emsifa.github.io/api-wilayah-indonesia/api/provinces.json"
+        );
+        const data = await res.json();
+        setProvinces(data);
+      } catch {
+        console.error("Failed to load provinces");
+      } finally {
+        setLoadingProvince(false);
+      }
+    }
+    loadProvinces();
+  }, []);
+
+  // ─── Fetch cities when province changes ────────────────────────────────────
+  useEffect(() => {
+    if (!formData.province_id) {
+      setCities([]);
+      return;
+    }
+    async function loadCities() {
+      setLoadingCity(true);
+      try {
+        const res = await fetch(
+          `https://emsifa.github.io/api-wilayah-indonesia/api/regencies/${formData.province_id}.json`
+        );
+        const data = await res.json();
+        setCities(data);
+      } catch {
+        console.error("Failed to load cities");
+      } finally {
+        setLoadingCity(false);
+      }
+    }
+    loadCities();
+  }, [formData.province_id]);
+
+  // ─── Fetch branches when scope = 'selected' ───────────────────────────────
+  useEffect(() => {
+    if (formData.scope === "selected" && branches.length === 0) {
+      async function loadBranches() {
+        setLoadingBranches(true);
+        try {
+          const res = await fetch("/api/branches", { cache: "no-store" });
+          const json = await res.json();
+          const data = Array.isArray(json) ? json : json?.data ?? [];
+          setBranches(data);
+        } catch {
+          console.error("Failed to load branches");
+        } finally {
+          setLoadingBranches(false);
+        }
+      }
+      loadBranches();
+    }
+  }, [formData.scope, branches.length]);
 
   // Load promotion data
   useEffect(() => {
@@ -103,7 +203,10 @@ export default function PromotionDetailPage() {
           qty_free: promo.qty_free || 0,
           start_date: promo.start_date ? promo.start_date.split("T")[0] : "",
           end_date: promo.end_date ? promo.end_date.split("T")[0] : "",
-          branch_id: promo.branch_id || "",
+          scope: promo.scope || "all",
+          province_id: promo.province_id || "",
+          city_id: promo.city_id || "",
+          branch_ids: promo.branches?.map((b: { branch_id: string }) => b.branch_id) || [],
           is_active: promo.is_active ?? true,
           max_uses: promo.max_uses || 0,
         });
@@ -128,6 +231,26 @@ export default function PromotionDetailPage() {
     }));
   };
 
+  const handleScopeChange = (value: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      scope: value,
+      // Reset province/city/branch_ids when switching scope
+      province_id: value === "all" || value === "selected" ? "" : prev.province_id,
+      city_id: value !== "city" ? "" : prev.city_id,
+      branch_ids: value !== "selected" ? [] : prev.branch_ids,
+    }));
+  };
+
+  const handleBranchToggle = (branchId: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      branch_ids: prev.branch_ids.includes(branchId)
+        ? prev.branch_ids.filter((id) => id !== branchId)
+        : [...prev.branch_ids, branchId],
+    }));
+  };
+
   const handleSave = async () => {
     if (!formData.name.trim()) {
       setFormError("Nama promosi wajib diisi");
@@ -149,16 +272,31 @@ export default function PromotionDetailPage() {
     setFormError(null);
     setIsSaving(true);
     try {
-      const payload = {
-        ...formData,
+      const payload: Record<string, unknown> = {
+        name: formData.name.trim(),
+        type: formData.type,
         discount_value: Number(formData.discount_value),
+        discount_type: formData.discount_type,
         qty_min: Number(formData.qty_min),
         qty_free: Number(formData.qty_free),
         max_uses: Number(formData.max_uses),
-        branch_id: formData.branch_id || undefined,
+        start_date: formData.start_date,
+        end_date: formData.end_date,
+        scope: formData.scope,
+        is_active: formData.is_active,
         code: formData.code.trim() || undefined,
         sku_target: formData.sku_target.trim() || undefined,
       };
+
+      // Add scope-specific fields
+      if (formData.scope === "province") {
+        payload.province_id = formData.province_id || undefined;
+      } else if (formData.scope === "city") {
+        payload.province_id = formData.province_id || undefined;
+        payload.city_id = formData.city_id || undefined;
+      } else if (formData.scope === "selected") {
+        payload.branch_ids = formData.branch_ids.length > 0 ? formData.branch_ids : undefined;
+      }
 
       const method = isNew ? "POST" : "PUT";
       const url = isNew ? "/api/promotions" : `/api/promotions/${promoId}`;
@@ -426,6 +564,170 @@ export default function PromotionDetailPage() {
                 </div>
                 <span className="text-sm font-medium">Status Aktif</span>
               </label>
+            </div>
+          )}
+
+          {/* ═══════════════════════════════════════════════════════════════════ */}
+          {/* Scope / Branch Coverage */}
+          {/* ═══════════════════════════════════════════════════════════════════ */}
+          <div className="w-full">
+            <label className="block text-sm font-medium text-foreground mb-3">
+              Cakupan Cabang
+            </label>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+              {SCOPE_OPTIONS.map((opt) => {
+                const Icon = opt.icon;
+                const isActive = formData.scope === opt.value;
+                return (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => handleScopeChange(opt.value)}
+                    className={cn(
+                      "flex flex-col items-center gap-1.5 rounded-lg border-2 px-3 py-3 text-sm font-medium transition-all",
+                      isActive
+                        ? "border-primary bg-primary/5 text-primary"
+                        : "border-muted bg-card text-muted-foreground hover:border-border hover:text-foreground"
+                    )}
+                  >
+                    <Icon className="w-5 h-5" />
+                    <span>{opt.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Conditional scope fields */}
+
+          {/* By Province */}
+          {formData.scope === "province" && (
+            <div className="w-full">
+              <label className="block text-sm font-medium text-foreground mb-1.5">
+                Pilih Provinsi
+              </label>
+              <select
+                name="province_id"
+                value={formData.province_id}
+                onChange={handleChange}
+                className="flex h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                disabled={loadingProvince}
+              >
+                <option value="">
+                  {loadingProvince ? "Memuat..." : "Pilih Provinsi"}
+                </option>
+                {provinces.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+
+          {/* By City */}
+          {formData.scope === "city" && (
+            <>
+              <div className="w-full">
+                <label className="block text-sm font-medium text-foreground mb-1.5">
+                  Pilih Provinsi
+                </label>
+                <select
+                  name="province_id"
+                  value={formData.province_id}
+                  onChange={handleChange}
+                  className="flex h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                  disabled={loadingProvince}
+                >
+                  <option value="">
+                    {loadingProvince ? "Memuat..." : "Pilih Provinsi"}
+                  </option>
+                  {provinces.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              {formData.province_id && (
+                <div className="w-full">
+                  <label className="block text-sm font-medium text-foreground mb-1.5">
+                    Pilih Kota / Kabupaten
+                  </label>
+                  <select
+                    name="city_id"
+                    value={formData.city_id}
+                    onChange={handleChange}
+                    className="flex h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                    disabled={loadingCity}
+                  >
+                    <option value="">
+                      {loadingCity ? "Memuat..." : "Pilih Kota / Kabupaten"}
+                    </option>
+                    {cities.map((c) => (
+                      <option key={c.id} value={c.id}>
+                        {c.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+            </>
+          )}
+
+          {/* Selected Branches */}
+          {formData.scope === "selected" && (
+            <div className="w-full">
+              <label className="block text-sm font-medium text-foreground mb-2">
+                Pilih Cabang ({formData.branch_ids.length} dipilih)
+              </label>
+              {loadingBranches ? (
+                <p className="text-sm text-muted-foreground">Memuat daftar cabang...</p>
+              ) : branches.length === 0 ? (
+                <p className="text-sm text-muted-foreground">Tidak ada cabang tersedia.</p>
+              ) : (
+                <div className="max-h-60 overflow-y-auto rounded-lg border border-border p-2 space-y-1">
+                  {branches.map((branch) => {
+                    const isSelected = formData.branch_ids.includes(branch.id);
+                    return (
+                      <label
+                        key={branch.id}
+                        className={cn(
+                          "flex items-center gap-3 px-3 py-2 rounded-md cursor-pointer transition-colors",
+                          isSelected
+                            ? "bg-primary/5 text-foreground"
+                            : "hover:bg-accent/50 text-muted-foreground"
+                        )}
+                      >
+                        <div className="relative flex items-center justify-center w-5 h-5">
+                          <input
+                            type="checkbox"
+                            checked={isSelected}
+                            onChange={() => handleBranchToggle(branch.id)}
+                            className="sr-only peer"
+                          />
+                          <div
+                            className={cn(
+                              "w-5 h-5 rounded border-2 flex items-center justify-center transition-all",
+                              isSelected
+                                ? "border-primary bg-primary"
+                                : "border-muted-foreground/30 bg-background"
+                            )}
+                          >
+                            {isSelected && <Check className="w-3 h-3 text-white" />}
+                          </div>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium truncate">{branch.name}</p>
+                          <p className="text-xs text-muted-foreground truncate">
+                            {branch.code}{branch.city ? ` — ${branch.city}` : ""}
+                          </p>
+                        </div>
+                      </label>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           )}
         </div>

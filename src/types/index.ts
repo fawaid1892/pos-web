@@ -207,7 +207,10 @@ export interface Promotion {
   qty_free: number;
   start_date: string;
   end_date: string;
-  branch_id?: string;
+  scope: 'all' | 'province' | 'city' | 'selected';
+  province_id?: string;
+  city_id?: string;
+  branches?: { promotion_id: string; branch_id: string }[];
   is_active: boolean;
   max_uses: number;
   current_uses: number;
@@ -226,7 +229,10 @@ export interface PromotionFormData {
   qty_free: number;
   start_date: string;
   end_date: string;
-  branch_id?: string;
+  scope: string;
+  province_id?: string;
+  city_id?: string;
+  branch_ids?: string[];
   is_active: boolean;
   max_uses: number;
 }
