@@ -1,0 +1,2 @@
+# Set Node.js version for Railway
+NODE_VERSION=20
