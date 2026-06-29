@@ -3,10 +3,10 @@
 import { useEffect, useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ReceiptPreview } from "@/components/receipt/receipt-preview";
-import { useReceiptSettingsStore } from "@/hooks/useReceiptSettings";
+import { FileTextPreview } from "@/components/receipt/receipt-preview";
+import { useFileTextSettingsStore } from "@/hooks/useFileTextSettings";
 import { useBranchStore } from "@/hooks/useBranch";
-import type { ReceiptSettingsFormData } from "@/types";
+import type { FileTextSettingsFormData } from "@/types";
 import { cn } from "@/lib/utils";
 import { Printer, Save, Upload, RotateCcw } from "lucide-react";
 
@@ -27,13 +27,13 @@ const fontSizeOptions = [
   { value: "lg", label: "Besar" },
 ] as const;
 
-export default function ReceiptSettingsPage() {
+export default function FileTextSettingsPage() {
   const { settings, isLoading, isSaving, fetchSettings, saveSettings, updateLogo } =
-    useReceiptSettingsStore();
+    useFileTextSettingsStore();
   const { activeBranch } = useBranchStore();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const [form, setForm] = useState<ReceiptSettingsFormData | null>(null);
+  const [form, setForm] = useState<FileTextSettingsFormData | null>(null);
 
   // Load settings on mount
   useEffect(() => {
@@ -51,9 +51,9 @@ export default function ReceiptSettingsPage() {
     }
   }, [settings, form]);
 
-  const updateField = <K extends keyof ReceiptSettingsFormData>(
+  const updateField = <K extends keyof FileTextSettingsFormData>(
     key: K,
-    value: ReceiptSettingsFormData[K]
+    value: FileTextSettingsFormData[K]
   ) => {
     setForm((prev) => (prev ? { ...prev, [key]: value } : null));
   };
@@ -365,7 +365,7 @@ export default function ReceiptSettingsPage() {
                 Pratinjau Struk
               </h3>
               <div className="flex justify-center">
-                <ReceiptPreview
+                <FileTextPreview
                   settings={{
                     id: "",
                     branchId: activeBranch?.id || "",

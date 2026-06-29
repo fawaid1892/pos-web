@@ -1,13 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { ArrowDown, Store, Check } from "lucide-react";
-import { useBranchStore } from "@/hooks/useBranch";
+import { ArrowDown, ShoppingBag, Check } from "lucide-react";
+import { useBranchShoppingBag } from "@/hooks/useBranch";
 import { cn } from "@/lib/utils";
 
 export function BranchSelector() {
   const [open, setOpen] = useState(false);
-  const { branches, activeBranch, setActiveBranch } = useBranchStore();
+  const { branches, activeBranch, setActiveBranch } = useBranchShoppingBag();
 
   return (
     <div className="relative">
@@ -18,7 +18,7 @@ export function BranchSelector() {
           "hover:bg-accent border border-border"
         )}
       >
-        <Store className="w-4 h-4" />
+        <ShoppingBag className="w-4 h-4" />
         <span className="font-medium">
           {activeBranch?.name || "Pilih Cabang"}
         </span>

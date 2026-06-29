@@ -3,8 +3,8 @@
 import { useQuery } from "@tanstack/react-query";
 import {
   ArrowUp,
-  Receipt,
-  Store,
+  FileText,
+  ShoppingBag,
   AlertTriangle,
   ArrowUpRight,
   ArrowDownRight,
@@ -167,13 +167,13 @@ export default function DashboardPage() {
     {
       label: "Total Transaksi",
       value: stats?.total_transactions ?? 0,
-      icon: Receipt,
+      icon: FileText,
       color: "bg-blue-500/10 text-blue-600",
     },
     {
       label: "Cabang Aktif",
       value: stats?.active_branches ?? 0,
-      icon: Store,
+      icon: ShoppingBag,
       color: "bg-violet-500/10 text-violet-600",
     },
     {

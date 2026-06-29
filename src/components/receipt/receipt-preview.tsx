@@ -1,10 +1,10 @@
 "use client";
 
-import type { ReceiptSettings } from "@/types";
+import type { FileTextSettings } from "@/types";
 import { cn } from "@/lib/utils";
 
-interface ReceiptPreviewProps {
-  settings: ReceiptSettings;
+interface FileTextPreviewProps {
+  settings: FileTextSettings;
   className?: string;
 }
 
@@ -12,7 +12,7 @@ interface ReceiptPreviewProps {
  * Live preview of thermal receipt based on current settings.
  * Scales down to fit the preview container (simulates ~80mm / ~58mm width).
  */
-export function ReceiptPreview({ settings, className }: ReceiptPreviewProps) {
+export function FileTextPreview({ settings, className }: FileTextPreviewProps) {
   const isWide = settings.paperWidth === "80mm";
 
   const fontStyles: Record<string, string> = {
@@ -62,7 +62,7 @@ export function ReceiptPreview({ settings, className }: ReceiptPreviewProps) {
           </div>
         )}
 
-        {/* Store name */}
+        {/* ShoppingBag name */}
         <div className="text-center mb-1">
           <p className="font-bold text-sm uppercase tracking-wider">
             {settings.storeName}

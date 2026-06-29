@@ -6,21 +6,21 @@
  */
 
 import { create } from "zustand";
-import type { ReceiptSettings, ReceiptSettingsFormData } from "@/types";
+import type { FileTextSettings, FileTextSettingsFormData } from "@/types";
 
-interface ReceiptSettingsState {
-  settings: ReceiptSettings | null;
+interface FileTextSettingsState {
+  settings: FileTextSettings | null;
   isLoading: boolean;
   isSaving: boolean;
   error: string | null;
 
   fetchSettings: (branchId: string) => Promise<void>;
-  saveSettings: (data: ReceiptSettingsFormData) => Promise<void>;
+  saveSettings: (data: FileTextSettingsFormData) => Promise<void>;
   updateLogo: (logoUrl: string) => void;
   clearError: () => void;
 }
 
-const defaultSettings: ReceiptSettings = {
+const defaultSettings: FileTextSettings = {
   id: "rcpt-001",
   branchId: "br-001",
   storeName: "Toko POS Retail",
@@ -41,7 +41,7 @@ const defaultSettings: ReceiptSettings = {
   updatedAt: "2025-06-01T00:00:00Z",
 };
 
-export const useReceiptSettingsStore = create<ReceiptSettingsState>(
+export const useFileTextSettingsStore = create<FileTextSettingsState>(
   (set) => ({
     settings: null,
     isLoading: false,
@@ -52,7 +52,7 @@ export const useReceiptSettingsStore = create<ReceiptSettingsState>(
       set({ isLoading: true, error: null });
       try {
         // TODO: Ganti dengan API call
-        // const response = await api.get<ReceiptSettings>(`/settings/receipt/${branchId}`);
+        // const response = await api.get<FileTextSettings>(`/settings/receipt/${branchId}`);
         // set({ settings: response.data, isLoading: false });
 
         await new Promise((r) => setTimeout(r, 200));
@@ -65,11 +65,11 @@ export const useReceiptSettingsStore = create<ReceiptSettingsState>(
       }
     },
 
-    saveSettings: async (data: ReceiptSettingsFormData) => {
+    saveSettings: async (data: FileTextSettingsFormData) => {
       set({ isSaving: true, error: null });
       try {
         // TODO: Ganti dengan API call
-        // const response = await api.put<ReceiptSettings>("/settings/receipt", data);
+        // const response = await api.put<FileTextSettings>("/settings/receipt", data);
         // set({ settings: response.data, isSaving: false });
 
         await new Promise((r) => setTimeout(r, 500));

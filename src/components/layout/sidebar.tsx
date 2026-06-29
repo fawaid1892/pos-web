@@ -1,9 +1,9 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { useBranchStore } from "@/hooks/useBranch";
+import { useBranchShoppingBag } from "@/hooks/useBranch";
 import {
-  LayoutDashboard,
+  Layout,
   ShoppingCart,
   Package,
   Users,
@@ -11,15 +11,15 @@ import {
   LogOut,
   ArrowLeft,
   ArrowRight,
-  Store,
-  SlidersHorizontal,
+  ShoppingBag,
+  Sliders,
   BarChart,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 
 const navItems = [
-  { icon: LayoutDashboard, label: "Dashboard", href: "/" },
+  { icon: Layout, label: "Dashboard", href: "/" },
   { icon: ShoppingCart, label: "POS", href: "/pos" },
   { icon: Package, label: "Products", href: "/products" },
   { icon: Package, label: "Stock", href: "/stock" },
@@ -31,7 +31,7 @@ const navItems = [
 export function Sidebar() {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const { activeBranch } = useBranchStore();
+  const { activeBranch } = useBranchShoppingBag();
   const pathname = usePathname();
   const router = useRouter();
 
@@ -48,7 +48,7 @@ export function Sidebar() {
       {/* Logo / Header */}
       <div className="flex items-center gap-3 p-4 border-b border-border">
         <div className="w-8 h-8 rounded-lg bg-brand-600 flex items-center justify-center shrink-0">
-          <Store className="w-4 h-4 text-white" />
+          <ShoppingBag className="w-4 h-4 text-white" />
         </div>
         {!collapsed && (
           <div className="flex flex-col">
@@ -114,7 +114,7 @@ export function Sidebar() {
         onClick={() => setMobileOpen(!mobileOpen)}
         className="fixed top-3 left-3 z-50 flex lg:hidden items-center justify-center w-9 h-9 rounded-lg bg-card border border-border shadow-sm"
       >
-        <SlidersHorizontal className="w-4 h-4" />
+        <Sliders className="w-4 h-4" />
       </button>
 
       {/* Desktop sidebar */}

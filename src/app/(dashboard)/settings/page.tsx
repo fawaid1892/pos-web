@@ -4,12 +4,12 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import {
-  Settings as SettingsIcon,
+  Settings,
   Globe,
-  Store,
+  ShoppingBag,
   Printer,
   Save,
-  Building2,
+  Home,
   MapPin,
   Phone,
   CheckCircle,
@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { useBranchStore } from "@/hooks/useBranch";
+import { useBranchShoppingBag } from "@/hooks/useBranch";
 
 // ─── LocalStorage helpers ──────────────────────────────────────────────────────
 
@@ -57,8 +57,8 @@ type Tab = "general" | "branch" | "receipt";
 
 const tabs: { id: Tab; label: string; icon: React.ElementType }[] = [
   { id: "general", label: "General", icon: Globe },
-  { id: "branch", label: "Branch", icon: Store },
-  { id: "receipt", label: "Receipt", icon: Printer },
+  { id: "branch", label: "Branch", icon: ShoppingBag },
+  { id: "receipt", label: "FileText", icon: Printer },
 ];
 
 // ─── Currency options ──────────────────────────────────────────────────────────
@@ -74,7 +74,7 @@ const currencyOptions = [
 
 export default function SettingsPage() {
   const router = useRouter();
-  const { branches, isLoading: branchesLoading, fetchBranches } = useBranchStore();
+  const { branches, isLoading: branchesLoading, fetchBranches } = useBranchShoppingBag();
   const [activeTab, setActiveTab] = useState<Tab>("general");
 
   // General settings state
@@ -234,7 +234,7 @@ export default function SettingsPage() {
                 </div>
               ) : branches.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-32 text-muted-foreground">
-                  <Building2 className="w-8 h-8 mb-2 opacity-40" />
+                  <Home className="w-8 h-8 mb-2 opacity-40" />
                   <p className="text-sm">No branches available</p>
                 </div>
               ) : (
@@ -245,7 +245,7 @@ export default function SettingsPage() {
                       className="bg-card border border-border rounded-xl p-4 flex items-start gap-4"
                     >
                       <div className="w-10 h-10 rounded-lg bg-brand-50 text-brand-700 dark:bg-brand-900/20 dark:text-brand-400 flex items-center justify-center shrink-0">
-                        <Building2 className="w-5 h-5" />
+                        <Home className="w-5 h-5" />
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
@@ -300,12 +300,12 @@ export default function SettingsPage() {
             </div>
           )}
 
-          {/* ── Receipt Tab ─────────────────────────────── */}
+          {/* ── FileText Tab ─────────────────────────────── */}
           {activeTab === "receipt" && (
             <div className="space-y-6">
               <div className="bg-card border border-border rounded-xl p-5">
                 <h3 className="text-sm font-semibold mb-2">
-                  Receipt / Struk Settings
+                  FileText / Struk Settings
                 </h3>
                 <p className="text-sm text-muted-foreground mb-4">
                   Customize thermal receipt appearance including header, footer,
@@ -313,7 +313,7 @@ export default function SettingsPage() {
                 </p>
                 <Button onClick={() => router.push("/settings/receipt")}>
                   <Printer className="w-4 h-4 mr-2" />
-                  Open Receipt Settings
+                  Open FileText Settings
                   <ArrowRight className="w-4 h-4 ml-1" />
                 </Button>
               </div>
@@ -328,7 +328,7 @@ export default function SettingsPage() {
                 <ul className="space-y-2 text-sm text-muted-foreground">
                   <li className="flex items-center gap-2">
                     <CheckCircle className="w-3.5 h-3.5 text-green-500 shrink-0" />
-                    Store identity (name, address, phone, tax ID)
+                    ShoppingBag identity (name, address, phone, tax ID)
                   </li>
                   <li className="flex items-center gap-2">
                     <CheckCircle className="w-3.5 h-3.5 text-green-500 shrink-0" />

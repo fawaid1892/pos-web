@@ -83,8 +83,8 @@ export interface Transaction {
   createdAt: string;
 }
 
-// ─── Receipt Settings ─────────────────────────────────────────────────────────
-export interface ReceiptSettings {
+// ─── FileText Settings ─────────────────────────────────────────────────────────
+export interface FileTextSettings {
   id: string;
   branchId: string;
   headerText: string;
@@ -106,9 +106,9 @@ export interface ReceiptSettings {
   updatedAt: string;
 }
 
-// ─── Receipt Settings Form (untuk form input)
-export type ReceiptSettingsFormData = Omit<
-  ReceiptSettings,
+// ─── FileText Settings Form (untuk form input)
+export type FileTextSettingsFormData = Omit<
+  FileTextSettings,
   "id" | "branchId" | "updatedAt"
 >;
 

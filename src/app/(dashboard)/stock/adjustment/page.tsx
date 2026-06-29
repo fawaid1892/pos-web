@@ -7,7 +7,7 @@ import { useAdjustStock } from "@/hooks/useInventoryQuery";
 import { useProducts } from "@/hooks/useProductsQuery";
 import { useBranchStore } from "@/hooks/useBranch";
 import {
-  ArrowUpDown,
+  ArrowUp,
   ArrowLeft,
   Search,
   Package,
@@ -104,7 +104,7 @@ export default function StockAdjustmentPage() {
           </Button>
           <div>
             <h2 className="text-xl font-semibold flex items-center gap-2">
-              <ArrowUpDown className="w-5 h-5" />
+              <ArrowUp className="w-5 h-5" />
               Adjustment Stok
             </h2>
             <p className="text-sm text-muted-foreground mt-0.5">

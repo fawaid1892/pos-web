@@ -5,14 +5,14 @@ declare module "lucide-react" {
   export const EyeOff: FC<SVGProps<SVGSVGElement>>;
   export const AlertCircle: FC<SVGProps<SVGSVGElement>>;
   export const ArrowUp: FC<SVGProps<SVGSVGElement>>;
-  export const Receipt: FC<SVGProps<SVGSVGElement>>;
-  export const Store: FC<SVGProps<SVGSVGElement>>;
+  export const FileText: FC<SVGProps<SVGSVGElement>>;
+  export const ShoppingBag: FC<SVGProps<SVGSVGElement>>;
   export const AlertTriangle: FC<SVGProps<SVGSVGElement>>;
   export const ArrowUpRight: FC<SVGProps<SVGSVGElement>>;
   export const ArrowDownRight: FC<SVGProps<SVGSVGElement>>;
   export const ArrowDown: FC<SVGProps<SVGSVGElement>>;
   export const ChevronUp: FC<SVGProps<SVGSVGElement>>;
-  export const LayoutDashboard: FC<SVGProps<SVGSVGElement>>;
+  export const Layout: FC<SVGProps<SVGSVGElement>>;
   export const ShoppingCart: FC<SVGProps<SVGSVGElement>>;
   export const Package: FC<SVGProps<SVGSVGElement>>;
   export const Box: FC<SVGProps<SVGSVGElement>>;

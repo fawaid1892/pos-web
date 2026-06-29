@@ -9,7 +9,7 @@ import { BranchSelector } from "@/components/layout/branch-selector";
 import {
   Package,
   Search,
-  ArrowUpDown,
+  ArrowUp,
   Edit,
     ArrowLeft,
     ArrowRight,
@@ -87,7 +87,7 @@ export default function StockInventoryPage() {
             size="sm"
             onClick={() => router.push("/stock/adjustment")}
           >
-            <ArrowUpDown className="w-4 h-4 mr-1.5" />
+            <ArrowUp className="w-4 h-4 mr-1.5" />
             Adjustment
           </Button>
           <Button
@@ -95,7 +95,7 @@ export default function StockInventoryPage() {
             size="sm"
             onClick={() => router.push("/stock/transfer")}
           >
-            <ArrowLeftRight className="w-4 h-4 mr-1.5" />
+            <ArrowRight className="w-4 h-4 mr-1.5" />
             Transfer
           </Button>
         </div>

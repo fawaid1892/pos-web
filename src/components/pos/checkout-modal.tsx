@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { X, CheckCircle2, Printer, Loader2 } from "lucide-react";
+import { X, CheckCircle, Printer, Loader2 } from "lucide-react";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { useCartStore } from "@/hooks/useCart";
@@ -100,7 +100,7 @@ export function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
         <div className="bg-background rounded-2xl w-full max-w-md p-8 text-center space-y-6">
           <div className="flex justify-center">
             <div className="w-16 h-16 rounded-full bg-green-100 dark:bg-green-900 flex items-center justify-center">
-              <CheckCircle2 className="w-8 h-8 text-green-600" />
+              <CheckCircle className="w-8 h-8 text-green-600" />
             </div>
           </div>
 

@@ -5,19 +5,19 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { useTransferStock } from "@/hooks/useInventoryQuery";
 import { useProducts } from "@/hooks/useProductsQuery";
-import { useBranchStore } from "@/hooks/useBranch";
+import { useBranchShoppingBag } from "@/hooks/useBranch";
 import {
-  ArrowLeftRight,
+  ArrowRight,
   ArrowLeft,
   Search,
   Package,
-  Store,
+  ShoppingBag,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export default function StockTransferPage() {
   const router = useRouter();
-  const { branches, activeBranch } = useBranchStore();
+  const { branches, activeBranch } = useBranchShoppingBag();
   const { data: products = [] } = useProducts();
   const transferMutation = useTransferStock();
 
@@ -127,7 +127,7 @@ export default function StockTransferPage() {
           </Button>
           <div>
             <h2 className="text-xl font-semibold flex items-center gap-2">
-              <ArrowLeftRight className="w-5 h-5" />
+              <ArrowRight className="w-5 h-5" />
               Transfer Stok
             </h2>
             <p className="text-sm text-muted-foreground mt-0.5">
