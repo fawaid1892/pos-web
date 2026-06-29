@@ -47,6 +47,7 @@ declare module "lucide-react" {
   export const ShoppingCart: FC<SVGProps<SVGSVGElement>>;
   export const Sliders: FC<SVGProps<SVGSVGElement>>;
   export const Smartphone: FC<SVGProps<SVGSVGElement>>;
+  export const Tag: FC<SVGProps<SVGSVGElement>>;
   export const Trash2: FC<SVGProps<SVGSVGElement>>;
   export const Upload: FC<SVGProps<SVGSVGElement>>;
   export const Building2: FC<SVGProps<SVGSVGElement>>;

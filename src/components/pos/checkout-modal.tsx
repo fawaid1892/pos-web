@@ -1,12 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { X, CheckCircle, Printer, Loader, Percent, Ticket } from "lucide-react";
+import { useState, useEffect, useCallback } from "react";
+import { X, CheckCircle, Printer, Loader, Percent, Ticket, Tag } from "lucide-react";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { useCartStore } from "@/hooks/useCart";
 import { useBranchStore } from "@/hooks/useBranch";
 import { formatCurrency, generateInvoice } from "@/lib/utils";
+import { autoApplyPromotions } from "@/lib/auto-apply-promotions";
 import type { Promotion } from "@/types";
 
 interface CheckoutModalProps {
@@ -24,7 +25,22 @@ const paymentMethods: { value: PaymentMethod; label: string }[] = [
 ];
 
 export function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
-  const { items, total, subtotal, discountPercent, setDiscountPercent, clearCart, voucherInfo, setVoucherDiscount, clearVoucher } = useCartStore();
+  const {
+    items,
+    total,
+    subtotal,
+    discountPercent,
+    setDiscountPercent,
+    clearCart,
+    voucherInfo,
+    setVoucherDiscount,
+    clearVoucher,
+    itemDiscountTotal,
+    autoAppliedPromotions,
+    autoDiscountTotal,
+    setAutoAppliedPromotions,
+    clearAutoAppliedPromotions,
+  } = useCartStore();
   const activeBranch = useBranchStore((state) => state.activeBranch);
   const [customerName, setCustomerName] = useState("");
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("cash");
@@ -42,6 +58,16 @@ export function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
   // Active promotions
   const [activePromotions, setActivePromotions] = useState<Promotion[]>([]);
   const [loadingPromotions, setLoadingPromotions] = useState(false);
+
+  // Auto-apply promotions whenever cart items or activePromotions change
+  const applyPromotions = useCallback(() => {
+    if (!activePromotions.length || !items.length) {
+      clearAutoAppliedPromotions();
+      return;
+    }
+    const applied = autoApplyPromotions(items, activePromotions);
+    setAutoAppliedPromotions(applied);
+  }, [items, activePromotions, setAutoAppliedPromotions, clearAutoAppliedPromotions]);
 
   // Fetch active promotions
   useEffect(() => {
@@ -63,6 +89,11 @@ export function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
     }
     fetchActivePromotions();
   }, [isOpen]);
+
+  // Auto-apply when promotions are loaded or items change
+  useEffect(() => {
+    applyPromotions();
+  }, [activePromotions, items, applyPromotions]);
 
   // Reset voucher input when modal opens
   useEffect(() => {
@@ -130,12 +161,18 @@ export function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
           product_id: item.productId,
           quantity: item.quantity,
           price: item.price,
+          discount_percent: item.discountPercent || 0,
         })),
         payment_method: paymentMethod,
         cash_amount: paymentMethod === "cash" ? Number(paymentAmount) || total() : total(),
         customer_name: customerName.trim() || undefined,
         discount_percent: discountPercent,
         voucher_code: voucherInfo?.code || undefined,
+        auto_promotions: autoAppliedPromotions.map((p) => ({
+          promotion_id: p.promotionId,
+          promotion_name: p.promotionName,
+          discount_value: p.discountValue,
+        })),
       };
 
       const res = await fetch("/api/transactions/checkout", {
@@ -161,6 +198,7 @@ export function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
 
   const handleNewTransaction = () => {
     clearCart();
+    clearAutoAppliedPromotions();
     setStep("payment");
     setPaymentAmount("");
     setPaymentMethod("cash");
@@ -295,22 +333,42 @@ export function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
               </p>
             ) : (
               <div className="space-y-2">
-                {activePromotions.slice(0, 3).map((promo) => (
-                  <div
-                    key={promo.id}
-                    className="flex items-center gap-2 p-2.5 rounded-lg bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 text-sm"
-                  >
-                    <Ticket className="w-4 h-4 text-blue-600 shrink-0" />
-                    <span className="text-blue-700 dark:text-blue-300 flex-1">
-                      {promo.name}
-                    </span>
-                    <span className="text-xs font-medium text-blue-600 dark:text-blue-400">
-                      {promo.discount_type === "persen"
-                        ? `${promo.discount_value}%`
-                        : formatCurrency(promo.discount_value)}
-                    </span>
-                  </div>
-                ))}
+                {activePromotions.slice(0, 3).map((promo) => {
+                  const isApplied = autoAppliedPromotions.some(
+                    (a) => a.promotionId === promo.id
+                  );
+                  return (
+                    <div
+                      key={promo.id}
+                      className={`flex items-center gap-2 p-2.5 rounded-lg text-sm ${
+                        isApplied
+                          ? "bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800"
+                          : "bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800"
+                      }`}
+                    >
+                      <Tag className={`w-4 h-4 shrink-0 ${
+                        isApplied ? "text-green-600" : "text-blue-600"
+                      }`} />
+                      <span className={`flex-1 ${
+                        isApplied
+                          ? "text-green-700 dark:text-green-300"
+                          : "text-blue-700 dark:text-blue-300"
+                      }`}>
+                        {promo.name}
+                      </span>
+                      <span className={`text-xs font-medium ${
+                        isApplied
+                          ? "text-green-600 dark:text-green-400"
+                          : "text-blue-600 dark:text-blue-400"
+                      }`}>
+                        {promo.discount_type === "persen"
+                          ? `${promo.discount_value}%`
+                          : formatCurrency(promo.discount_value)}
+                        {isApplied && " ✓"}
+                      </span>
+                    </div>
+                  );
+                })}
                 {activePromotions.length > 3 && (
                   <p className="text-xs text-muted-foreground text-center">
                     +{activePromotions.length - 3} promosi lainnya
@@ -413,10 +471,29 @@ export function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
             <p className="text-3xl font-bold text-brand-600">
               {formatCurrency(total())}
             </p>
+            {itemDiscountTotal > 0 && (
+              <p className="text-xs text-destructive mt-1">
+                Diskon item: hemat {formatCurrency(itemDiscountTotal)}
+              </p>
+            )}
             {discountPercent > 0 && (
               <p className="text-xs text-muted-foreground mt-1">
                 Diskon {discountPercent}% (hemat {formatCurrency(subtotal() - (subtotal() * discountPercent / 100))})
               </p>
+            )}
+            {autoDiscountTotal > 0 && (
+              <p className="text-xs text-blue-600 mt-0.5">
+                Promo otomatis: hemat {formatCurrency(autoDiscountTotal)}
+              </p>
+            )}
+            {autoAppliedPromotions.length > 0 && (
+              <div className="mt-1 space-y-0.5">
+                {autoAppliedPromotions.map((p) => (
+                  <p key={p.promotionId} className="text-[11px] text-blue-500">
+                    {p.promotionName}: -{formatCurrency(p.discountValue)}
+                  </p>
+                ))}
+              </div>
             )}
             {voucherInfo && (
               <p className="text-xs text-green-600 mt-0.5">

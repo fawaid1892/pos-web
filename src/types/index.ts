@@ -77,6 +77,16 @@ export interface TransactionItem {
   quantity: number;
   price: number;
   subtotal: number;
+  /** Per-item manual discount in percent (0-100), 0 = no discount */
+  discountPercent: number;
+}
+
+export interface AppliedPromotion {
+  promotionId: string;
+  promotionName: string;
+  type: string;
+  discountValue: number;
+  description: string;
 }
 
 export interface Transaction {

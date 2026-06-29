@@ -5,7 +5,7 @@
  */
 
 import { create } from "zustand";
-import type { TransactionItem } from "@/types";
+import type { TransactionItem, AppliedPromotion } from "@/types";
 
 interface CartState {
   items: TransactionItem[];
@@ -13,6 +13,11 @@ interface CartState {
   tax: number;
   voucherDiscount: number;
   voucherInfo: { code: string; name: string; value: number; type: string } | null;
+  /** Auto-applied promotion discounts from backend */
+  autoAppliedPromotions: AppliedPromotion[];
+  autoDiscountTotal: number;
+  /** Item-level manual discount totals */
+  itemDiscountTotal: number;
 
   // Computed
   subtotal: () => number;
@@ -22,7 +27,7 @@ interface CartState {
   itemCount: () => number;
 
   // Actions
-  addItem: (item: Omit<TransactionItem, "subtotal">) => void;
+  addItem: (item: Omit<TransactionItem, "subtotal" | "discountPercent">) => void;
   removeItem: (productId: string) => void;
   updateQuantity: (productId: string, quantity: number) => void;
   clearCart: () => void;
@@ -30,6 +35,20 @@ interface CartState {
   setTax: (amount: number) => void;
   setVoucherDiscount: (voucher: { code: string; name: string; value: number; type: string } | null) => void;
   clearVoucher: () => void;
+  /** Set per-item manual discount percent */
+  updateItemDiscount: (productId: string, discountPercent: number) => void;
+  /** Set auto-applied promotions */
+  setAutoAppliedPromotions: (promotions: AppliedPromotion[]) => void;
+  /** Clear auto-applied promotions */
+  clearAutoAppliedPromotions: () => void;
+}
+
+/** Recompute itemDiscountTotal from items */
+function computeItemDiscountTotal(items: TransactionItem[]): number {
+  return items.reduce((sum, item) => {
+    if (!item.discountPercent) return sum;
+    return sum + Math.round(item.subtotal * (item.discountPercent / 100));
+  }, 0);
 }
 
 export const useCartStore = create<CartState>((set, get) => ({
@@ -38,12 +57,16 @@ export const useCartStore = create<CartState>((set, get) => ({
   tax: 0,
   voucherDiscount: 0,
   voucherInfo: null,
+  autoAppliedPromotions: [],
+  autoDiscountTotal: 0,
+  itemDiscountTotal: 0,
 
   subtotal: () => get().items.reduce((sum, item) => sum + item.subtotal, 0),
 
   discountAmount: () => {
     const subtotal = get().subtotal();
     const percent = get().discountPercent;
+    if (percent <= 0) return 0;
     return Math.round(subtotal * (percent / 100));
   },
 
@@ -54,9 +77,11 @@ export const useCartStore = create<CartState>((set, get) => ({
   total: () => {
     const subtotal = get().subtotal();
     const discount = get().discountAmount();
+    const itemDiscount = get().itemDiscountTotal;
     const voucher = get().voucherDiscount;
+    const autoDiscount = get().autoDiscountTotal;
     const tax = get().tax;
-    return subtotal - discount - voucher + tax;
+    return subtotal - discount - itemDiscount - voucher - autoDiscount + tax;
   },
 
   itemCount: () => get().items.reduce((sum, item) => sum + item.quantity, 0),
@@ -66,29 +91,28 @@ export const useCartStore = create<CartState>((set, get) => ({
     const existing = state.items.find((i) => i.productId === item.productId);
 
     if (existing) {
-      set({
-        items: state.items.map((i) =>
-          i.productId === item.productId
-            ? {
-                ...i,
-                quantity: i.quantity + item.quantity,
-                subtotal: (i.quantity + item.quantity) * i.price,
-              }
-            : i
-        ),
-      });
+      const updated = state.items.map((i) =>
+        i.productId === item.productId
+          ? {
+              ...i,
+              quantity: i.quantity + item.quantity,
+              subtotal: (i.quantity + item.quantity) * i.price,
+            }
+          : i
+      );
+      set({ items: updated, itemDiscountTotal: computeItemDiscountTotal(updated) });
     } else {
-      set({
-        items: [
-          ...state.items,
-          { ...item, subtotal: item.quantity * item.price },
-        ],
-      });
+      const updated = [
+        ...state.items,
+        { ...item, subtotal: item.quantity * item.price, discountPercent: 0 },
+      ];
+      set({ items: updated, itemDiscountTotal: computeItemDiscountTotal(updated) });
     }
   },
 
   removeItem: (productId) => {
-    set({ items: get().items.filter((i) => i.productId !== productId) });
+    const updated = get().items.filter((i) => i.productId !== productId);
+    set({ items: updated, itemDiscountTotal: computeItemDiscountTotal(updated) });
   },
 
   updateQuantity: (productId, quantity) => {
@@ -96,16 +120,24 @@ export const useCartStore = create<CartState>((set, get) => ({
       get().removeItem(productId);
       return;
     }
-    set({
-      items: get().items.map((i) =>
-        i.productId === productId
-          ? { ...i, quantity, subtotal: quantity * i.price }
-          : i
-      ),
-    });
+    const updated = get().items.map((i) =>
+      i.productId === productId
+        ? { ...i, quantity, subtotal: quantity * i.price }
+        : i
+    );
+    set({ items: updated, itemDiscountTotal: computeItemDiscountTotal(updated) });
   },
 
-  clearCart: () => set({ items: [], discountPercent: 0, tax: 0, voucherDiscount: 0, voucherInfo: null }),
+  clearCart: () => set({
+    items: [],
+    discountPercent: 0,
+    tax: 0,
+    voucherDiscount: 0,
+    voucherInfo: null,
+    autoAppliedPromotions: [],
+    autoDiscountTotal: 0,
+    itemDiscountTotal: 0,
+  }),
 
   setDiscountPercent: (percent) => set({ discountPercent: percent }),
   setTax: (amount) => set({ tax: amount }),
@@ -126,4 +158,21 @@ export const useCartStore = create<CartState>((set, get) => ({
   },
 
   clearVoucher: () => set({ voucherDiscount: 0, voucherInfo: null }),
+
+  updateItemDiscount: (productId, discountPercent) => {
+    const validPercent = Math.max(0, Math.min(100, discountPercent));
+    const updated = get().items.map((i) =>
+      i.productId === productId
+        ? { ...i, discountPercent: validPercent }
+        : i
+    );
+    set({ items: updated, itemDiscountTotal: computeItemDiscountTotal(updated) });
+  },
+
+  setAutoAppliedPromotions: (promotions) => {
+    const total = promotions.reduce((sum, p) => sum + p.discountValue, 0);
+    set({ autoAppliedPromotions: promotions, autoDiscountTotal: total });
+  },
+
+  clearAutoAppliedPromotions: () => set({ autoAppliedPromotions: [], autoDiscountTotal: 0 }),
 }));
