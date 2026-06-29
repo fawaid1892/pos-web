@@ -11,7 +11,6 @@ import {
   ArrowDown,
   FileText,
   Layout,
-  FileText,
   AlertCircle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -196,9 +195,9 @@ function ExportDropdown({
   };
 
   const formats: { value: ExportFormat; label: string; icon: React.ElementType }[] = [
-    { value: "pdf", label: "PDF", icon: FileText },
-    { value: "xlsx", label: "XLSX", icon: File },
-    { value: "csv", label: "CSV", icon: Grid },
+    { value: "pdf", label: "PDF", icon: FileTextText },
+    { value: "xlsx", label: "XLSX", icon: FileText },
+    { value: "csv", label: "CSV", icon: Layout },
   ];
 
   return (
