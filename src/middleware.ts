@@ -7,6 +7,7 @@ const PUBLIC_PATHS = [
   "/_next/static",
   "/_next/image",
   "/api/auth/login",
+  "/api/auth/refresh",
   "/favicon.ico",
 ];
 

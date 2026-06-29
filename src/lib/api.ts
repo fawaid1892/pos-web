@@ -1,7 +1,7 @@
 /**
  * API Client — Centralized HTTP layer
- * 
- * TODO: Update BASE_URL saat backend udah siap
+ *
+ * Automatically handles 401 responses by attempting token refresh.
  */
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001/api";
@@ -20,6 +20,65 @@ class ApiError extends Error {
     this.status = status;
     this.name = "ApiError";
   }
+}
+
+/**
+ * Attempt to refresh the auth token using the stored refresh_token.
+ * Returns true if a new token was obtained, false otherwise.
+ */
+async function attemptTokenRefresh(): Promise<boolean> {
+  // Only run on browser (localStorage is not available during SSR)
+  if (typeof window === "undefined") return false;
+
+  const refresh_token = localStorage.getItem("auth_refresh_token");
+  if (!refresh_token) return false;
+
+  try {
+    const res = await fetch("/api/auth/refresh", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ refresh_token }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      // Refresh failed — clear auth
+      localStorage.removeItem("auth_token");
+      localStorage.removeItem("auth_refresh_token");
+      localStorage.removeItem("auth_user");
+      localStorage.removeItem("active_branch_id");
+      return false;
+    }
+
+    const newToken = data?.token || data?.data?.token;
+    const newRefreshToken = data?.refresh_token || data?.data?.refresh_token;
+
+    if (!newToken) return false;
+
+    localStorage.setItem("auth_token", newToken);
+    if (newRefreshToken) {
+      localStorage.setItem("auth_refresh_token", newRefreshToken);
+    }
+    if (data?.user) {
+      localStorage.setItem("auth_user", JSON.stringify(data.user));
+    }
+
+    return true;
+  } catch {
+    // Network error during refresh — don't clear auth, might recover
+    return false;
+  }
+}
+
+/**
+ * Redirect to login page, preserving the current path as a redirect param.
+ */
+function redirectToLogin(): void {
+  if (typeof window === "undefined") return;
+  const currentPath = window.location.pathname;
+  if (currentPath === "/login") return; // already there
+  window.location.href = `/login?redirect=${encodeURIComponent(currentPath)}`;
 }
 
 async function request<T>(endpoint: string, options: RequestOptions = {}): Promise<T> {
@@ -52,6 +111,46 @@ async function request<T>(endpoint: string, options: RequestOptions = {}): Promi
     headers: { ...defaultHeaders, ...headers },
     body: body ? JSON.stringify(body) : undefined,
   });
+
+  // ─── 401 handling with automatic refresh ───────────────────────────────
+  if (response.status === 401 && typeof window !== "undefined") {
+    // Try to refresh the token
+    const refreshed = await attemptTokenRefresh();
+
+    if (refreshed) {
+      // Retry the original request with the new token
+      const newToken = localStorage.getItem("auth_token");
+      const retryHeaders: Record<string, string> = {
+        "Content-Type": "application/json",
+        ...headers,
+      };
+      if (newToken) retryHeaders["Authorization"] = `Bearer ${newToken}`;
+
+      const retryResponse = await fetch(url, {
+        method,
+        headers: retryHeaders,
+        body: body ? JSON.stringify(body) : undefined,
+      });
+
+      if (!retryResponse.ok) {
+        const errorData = await retryResponse.json().catch(() => ({}));
+        throw new ApiError(
+          errorData.message || `HTTP ${retryResponse.status}: ${retryResponse.statusText}`,
+          retryResponse.status
+        );
+      }
+
+      return retryResponse.json();
+    }
+
+    // Refresh failed or no refresh token — redirect to login
+    localStorage.removeItem("auth_token");
+    localStorage.removeItem("auth_refresh_token");
+    localStorage.removeItem("auth_user");
+    localStorage.removeItem("active_branch_id");
+    redirectToLogin();
+    throw new ApiError("Sesi telah berakhir. Silakan login kembali.", 401);
+  }
 
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));

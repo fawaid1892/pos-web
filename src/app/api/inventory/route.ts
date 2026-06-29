@@ -20,10 +20,14 @@ export async function GET(request: NextRequest) {
       ? `${url}?${new URLSearchParams({ branchId, ...Object.fromEntries(searchParams.entries()) }).toString()}`
       : url;
 
+    const token = request.cookies.get("auth_token")?.value;
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+    };
+    if (token) headers["Authorization"] = `Bearer ${token}`;
+
     const res = await fetch(fullUrl, {
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers,
       cache: "no-store",
     });
 

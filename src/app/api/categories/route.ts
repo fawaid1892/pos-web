@@ -4,14 +4,18 @@ const BACKEND_URL = process.env.BACKEND_API_URL || "http://localhost:8080/api/v1
 
 export async function GET(request: NextRequest) {
   try {
+    const token = request.cookies.get("auth_token")?.value;
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+    };
+    if (token) headers["Authorization"] = `Bearer ${token}`;
+
     const searchParams = request.nextUrl.searchParams;
     const queryString = searchParams.toString();
     const url = queryString ? `${BACKEND_URL}?${queryString}` : BACKEND_URL;
 
     const res = await fetch(url, {
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers,
       cache: "no-store",
     });
 

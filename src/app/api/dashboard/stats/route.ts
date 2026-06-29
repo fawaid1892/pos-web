@@ -9,12 +9,16 @@ export async function GET(request: NextRequest) {
   }
 
   try {
+    const token = request.cookies.get("auth_token")?.value;
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+    };
+    if (token) headers["Authorization"] = `Bearer ${token}`;
+
     const res = await fetch(
       `${process.env.BACKEND_API_URL || "http://localhost:8080"}/api/v1/dashboard/stats?branch_id=${branchId}`,
       {
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers,
         cache: "no-store",
       }
     );

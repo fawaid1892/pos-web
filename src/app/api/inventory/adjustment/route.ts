@@ -30,11 +30,15 @@ export async function POST(request: NextRequest) {
 
     const url = `${BACKEND_URL}/branches/${branchId}/inventory/adjustment`;
 
+    const token = request.cookies.get("auth_token")?.value;
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+    };
+    if (token) headers["Authorization"] = `Bearer ${token}`;
+
     const res = await fetch(url, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers,
       body: JSON.stringify({ productId, type, quantity, notes }),
       cache: "no-store",
     });

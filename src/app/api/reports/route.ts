@@ -29,10 +29,14 @@ export async function GET(request: NextRequest) {
       backendUrl += `?start=${start}&end=${end}`;
     }
 
+    const token = request.cookies.get("auth_token")?.value;
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+    };
+    if (token) headers["Authorization"] = `Bearer ${token}`;
+
     const res = await fetch(backendUrl, {
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers,
       cache: "no-store",
     });
 

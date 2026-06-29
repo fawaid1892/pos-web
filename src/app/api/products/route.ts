@@ -8,12 +8,13 @@ export async function GET(request: NextRequest) {
     const queryString = searchParams.toString();
     const url = queryString ? `${BACKEND_URL}?${queryString}` : BACKEND_URL;
 
-    const res = await fetch(url, {
-      headers: {
-        "Content-Type": "application/json",
-      },
-      cache: "no-store",
-    });
+    const token = request.cookies.get("auth_token")?.value;
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+    };
+    if (token) headers["Authorization"] = `Bearer ${token}`;
+
+    const res = await fetch(url, { headers, cache: "no-store" });
 
     if (!res.ok) {
       const errorData = await res.json().catch(() => null);
@@ -38,11 +39,15 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
 
+    const token = request.cookies.get("auth_token")?.value;
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+    };
+    if (token) headers["Authorization"] = `Bearer ${token}`;
+
     const res = await fetch(BACKEND_URL, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers,
       body: JSON.stringify(body),
       cache: "no-store",
     });

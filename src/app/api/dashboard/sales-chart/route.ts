@@ -13,10 +13,14 @@ export async function GET(request: NextRequest) {
   try {
     const url = `${process.env.BACKEND_API_URL || "http://localhost:8080"}/api/v1/dashboard/sales-chart?start=${start}&end=${end}&branch_id=${branchId}`;
 
+    const token = request.cookies.get("auth_token")?.value;
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+    };
+    if (token) headers["Authorization"] = `Bearer ${token}`;
+
     const res = await fetch(url, {
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers,
       cache: "no-store",
     });
 

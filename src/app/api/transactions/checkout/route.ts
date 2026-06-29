@@ -5,12 +5,15 @@ const BACKEND_URL = `${process.env.BACKEND_API_URL || "http://localhost:8080"}/a
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
+    const token = request.cookies.get("auth_token")?.value;
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+    };
+    if (token) headers["Authorization"] = `Bearer ${token}`;
 
     const res = await fetch(BACKEND_URL, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers,
       body: JSON.stringify(body),
       cache: "no-store",
     });

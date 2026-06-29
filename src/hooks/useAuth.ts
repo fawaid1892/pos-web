@@ -16,6 +16,7 @@ interface AuthState {
   logout: () => void;
   clearError: () => void;
   initialize: () => void;
+  refreshAuth: () => Promise<boolean>;
 }
 
 export const useAuthStore = create<AuthState>((set, get) => ({
@@ -36,6 +37,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         set({ session, isAuthenticated: true });
       } catch {
         localStorage.removeItem("auth_token");
+        localStorage.removeItem("auth_refresh_token");
         localStorage.removeItem("auth_user");
       }
     }
@@ -56,10 +58,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         throw new Error(data?.error || "Login gagal");
       }
 
-      const { token, user } = data;
+      const { token, refresh_token, user } = data;
 
       // Persist to localStorage
       localStorage.setItem("auth_token", token);
+      if (refresh_token) {
+        localStorage.setItem("auth_refresh_token", refresh_token);
+      }
       localStorage.setItem("auth_user", JSON.stringify(user));
 
       // If backend returns activeBranchId, store it
@@ -86,10 +91,54 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     fetch("/api/auth/logout", { method: "POST" }).catch(() => {});
 
     localStorage.removeItem("auth_token");
+    localStorage.removeItem("auth_refresh_token");
     localStorage.removeItem("auth_user");
     localStorage.removeItem("active_branch_id");
     set({ session: null, isAuthenticated: false });
   },
 
   clearError: () => set({ error: null }),
+
+  refreshAuth: async () => {
+    const refresh_token = localStorage.getItem("auth_refresh_token");
+    if (!refresh_token) return false;
+
+    try {
+      const res = await fetch("/api/auth/refresh", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ refresh_token }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        // Refresh failed — clear everything
+        get().logout();
+        return false;
+      }
+
+      const { token: newToken, refresh_token: newRefreshToken, user } = data;
+
+      // Update localStorage
+      localStorage.setItem("auth_token", newToken);
+      if (newRefreshToken) {
+        localStorage.setItem("auth_refresh_token", newRefreshToken);
+      }
+      if (user) {
+        localStorage.setItem("auth_user", JSON.stringify(user));
+      }
+
+      // Update session
+      set({
+        session: { user: user || get().session?.user, token: newToken, activeBranchId: user?.branchId || get().session?.activeBranchId || "" },
+        isAuthenticated: true,
+      });
+
+      return true;
+    } catch {
+      get().logout();
+      return false;
+    }
+  },
 }));
