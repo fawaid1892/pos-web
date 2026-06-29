@@ -14,7 +14,7 @@ import {
   Phone,
   CheckCircle,
   XCircle,
-  ChevronLast,
+  ChevronRight,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -314,7 +314,7 @@ export default function SettingsPage() {
                 <Button onClick={() => router.push("/settings/receipt")}>
                   <Printer className="w-4 h-4 mr-2" />
                   Open Receipt Settings
-                  <ChevronLast className="w-4 h-4 ml-1" />
+                  <ChevronRight className="w-4 h-4 ml-1" />
                 </Button>
               </div>
 
