@@ -46,7 +46,9 @@ export const useBranchStore = create<BranchState>((set, get) => ({
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
       const raw = await response.json();
-      const branches = extractArray<Branch>(raw).map(normalizeBranch);
+      const rawList = Array.isArray(raw) ? raw : (raw as Record<string, unknown>).data;
+      const list = Array.isArray(rawList) ? rawList : [];
+      const branches = list.map(normalizeBranch);
       set({ branches, isLoading: false });
     } catch (err) {
       set({
