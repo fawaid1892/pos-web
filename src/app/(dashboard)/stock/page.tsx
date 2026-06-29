@@ -11,8 +11,8 @@ import {
   Search,
   ArrowUpDown,
   Edit,
-    ChevronLeft,
-    ChevronRight,
+    ArrowLeft,
+    ArrowRight,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -246,7 +246,7 @@ export default function StockInventoryPage() {
               disabled={page <= 1}
               onClick={() => setPage((p) => Math.max(1, p - 1))}
             >
-              <ChevronLeft className="w-4 h-4" />
+              <ArrowLeft className="w-4 h-4" />
             </Button>
             <Button
               variant="outline"
@@ -254,7 +254,7 @@ export default function StockInventoryPage() {
               disabled={page >= totalPages}
               onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
             >
-              <ChevronRight className="w-4 h-4" />
+              <ArrowRight className="w-4 h-4" />
             </Button>
           </div>
         </div>

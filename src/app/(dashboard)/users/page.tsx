@@ -13,8 +13,8 @@ import {
   Search,
   Edit,
   Trash2,
-  ChevronLeft,
-  ChevronRight,
+  ArrowLeft,
+  ArrowRight,
   Users,
 } from "lucide-react";
 
@@ -267,7 +267,7 @@ export default function UserListPage() {
               disabled={page <= 1}
               onClick={() => setPage((p) => Math.max(1, p - 1))}
             >
-              <ChevronLeft className="w-4 h-4" />
+              <ArrowLeft className="w-4 h-4" />
             </Button>
             <Button
               variant="outline"
@@ -275,7 +275,7 @@ export default function UserListPage() {
               disabled={page >= totalPages}
               onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
             >
-              <ChevronRight className="w-4 h-4" />
+              <ArrowRight className="w-4 h-4" />
             </Button>
           </div>
         </div>

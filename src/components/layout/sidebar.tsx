@@ -9,8 +9,8 @@ import {
   Users,
   Settings,
   LogOut,
-  ChevronLeft,
-  ChevronRight,
+  ArrowLeft,
+  ArrowRight,
   Store,
   SlidersHorizontal,
   BarChart3,
@@ -90,9 +90,9 @@ export function Sidebar() {
           )}
         >
           {collapsed ? (
-            <ChevronRight className="w-4 h-4" />
+            <ArrowRight className="w-4 h-4" />
           ) : (
-            <ChevronLeft className="w-4 h-4" />
+            <ArrowLeft className="w-4 h-4" />
           )}
         </button>
       </div>
