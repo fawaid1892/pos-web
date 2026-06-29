@@ -1,7 +1,7 @@
 {
   "build": {
     "builder": "nixpacks",
-    "buildCommand": "rm -rf node_modules/.cache && npm install && npm run build",
+    "buildCommand": "npm install --prefer-offline && npm run build",
     "startCommand": "npm start"
   }
 }
