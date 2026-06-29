@@ -1,9 +1,8 @@
 /**
  * Hook untuk autentikasi
- * 
- * TODO: Implementasi login real setelah backend siap
+ *
+ * Login via API proxy /api/auth/login, simpan token ke localStorage + zustand.
  */
-
 import { create } from "zustand";
 import type { AuthSession, User } from "@/types";
 
@@ -13,46 +12,67 @@ interface AuthState {
   isLoading: boolean;
   error: string | null;
 
-  login: (email: string, password: string) => Promise<void>;
+  login: (usernameOrEmail: string, password: string) => Promise<void>;
   logout: () => void;
   clearError: () => void;
+  initialize: () => void;
 }
 
-export const useAuthStore = create<AuthState>((set) => ({
+export const useAuthStore = create<AuthState>((set, get) => ({
   session: null,
   isAuthenticated: false,
   isLoading: false,
   error: null,
 
-  login: async (email: string, _password: string) => {
+  initialize: () => {
+    const token = localStorage.getItem("auth_token");
+    const userJson = localStorage.getItem("auth_user");
+    const activeBranchId = localStorage.getItem("active_branch_id");
+
+    if (token && userJson) {
+      try {
+        const user: User = JSON.parse(userJson);
+        const session: AuthSession = { user, token, activeBranchId: activeBranchId || "" };
+        set({ session, isAuthenticated: true });
+      } catch {
+        localStorage.removeItem("auth_token");
+        localStorage.removeItem("auth_user");
+      }
+    }
+  },
+
+  login: async (usernameOrEmail: string, password: string) => {
     set({ isLoading: true, error: null });
     try {
-      // TODO: Ganti dengan panggilan API beneran
-      // const response = await api.post<AuthSession>("/auth/login", { email, password });
-      // set({ session: response.data, isAuthenticated: true, isLoading: false });
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username: usernameOrEmail, password }),
+      });
 
-      // Mock login
-      const mockUser: User = {
-        id: "usr-001",
-        name: "Admin Toko",
-        email: email,
-        role: "superadmin",
-        phone: "081234567890",
-        isActive: true,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
+      const data = await res.json();
 
-      const mockSession: AuthSession = {
-        user: mockUser,
-        token: "mock-token-xxx",
-        activeBranchId: "br-001",
-      };
+      if (!res.ok) {
+        throw new Error(data?.error || "Login gagal");
+      }
 
-      localStorage.setItem("auth_token", mockSession.token);
-      localStorage.setItem("active_branch_id", mockSession.activeBranchId);
+      const { token, user } = data;
 
-      set({ session: mockSession, isAuthenticated: true, isLoading: false });
+      // Persist to localStorage
+      localStorage.setItem("auth_token", token);
+      localStorage.setItem("auth_user", JSON.stringify(user));
+
+      // If backend returns activeBranchId, store it
+      if (user?.branchId) {
+        localStorage.setItem("active_branch_id", user.branchId);
+      }
+
+      set({
+        session: { user, token, activeBranchId: user?.branchId || "" },
+        isAuthenticated: true,
+        isLoading: false,
+        error: null,
+      });
     } catch (err) {
       set({
         isLoading: false,
@@ -62,7 +82,11 @@ export const useAuthStore = create<AuthState>((set) => ({
   },
 
   logout: () => {
+    // Clear server-side cookie by calling API
+    fetch("/api/auth/logout", { method: "POST" }).catch(() => {});
+
     localStorage.removeItem("auth_token");
+    localStorage.removeItem("auth_user");
     localStorage.removeItem("active_branch_id");
     set({ session: null, isAuthenticated: false });
   },
