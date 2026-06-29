@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const url = `http://localhost:8080/api/v1/dashboard/sales-chart?start=${start}&end=${end}&branch_id=${branchId}`;
+    const url = `${process.env.BACKEND_API_URL || "http://localhost:8080"}/api/v1/dashboard/sales-chart?start=${start}&end=${end}&branch_id=${branchId}`;
 
     const res = await fetch(url, {
       headers: {
