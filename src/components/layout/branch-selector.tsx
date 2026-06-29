@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronDown, Store, Check } from "lucide-react";
+import { ArrowDown, Store, Check } from "lucide-react";
 import { useBranchStore } from "@/hooks/useBranch";
 import { cn } from "@/lib/utils";
 
@@ -22,7 +22,7 @@ export function BranchSelector() {
         <span className="font-medium">
           {activeBranch?.name || "Pilih Cabang"}
         </span>
-        <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" />
+        <ArrowDown className="w-3.5 h-3.5 text-muted-foreground" />
       </button>
 
       {open && (

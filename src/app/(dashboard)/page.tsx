@@ -2,7 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import {
-  TrendingUp,
+  ArrowUp,
   Receipt,
   Store,
   AlertTriangle,
@@ -161,7 +161,7 @@ export default function DashboardPage() {
     {
       label: "Pendapatan Hari Ini",
       value: stats?.today_revenue ?? 0,
-      icon: TrendingUp,
+      icon: ArrowUp,
       color: "bg-emerald-500/10 text-emerald-600",
     },
     {

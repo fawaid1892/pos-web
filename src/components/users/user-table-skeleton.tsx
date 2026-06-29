@@ -1,5 +1,5 @@
 /** Skeleton loading untuk tabel user */
-export function UserTableSkeleton() {
+export function UserGridSkeleton() {
   return (
     <div className="space-y-3 animate-pulse">
       {/* Header row skeleton */}

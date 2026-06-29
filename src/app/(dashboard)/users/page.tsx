@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
-import { UserTableSkeleton } from "@/components/users/user-table-skeleton";
+import { UserGridSkeleton } from "@/components/users/user-table-skeleton";
 import { UserFormModal, roleColors } from "@/components/users/user-form";
 import { useUsers, useDeleteUser } from "@/hooks/useUsersQuery";
 import { formatDate } from "@/lib/utils";
@@ -140,11 +140,11 @@ export default function UserListPage() {
         </div>
       )}
 
-      {/* Table */}
+      {/* Grid */}
       <div className="flex-1 overflow-auto">
         {isLoading ? (
           <div className="px-6 py-4">
-            <UserTableSkeleton />
+            <UserGridSkeleton />
           </div>
         ) : paginated.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-center p-8">

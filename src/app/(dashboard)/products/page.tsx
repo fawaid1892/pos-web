@@ -113,7 +113,7 @@ export default function ProductListPage() {
         </div>
       )}
 
-      {/* Table */}
+      {/* Grid */}
       <div className="flex-1 overflow-auto">
         {isLoading ? (
           <div className="px-6 py-4 space-y-3">

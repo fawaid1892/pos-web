@@ -3,15 +3,15 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
-  BarChart3,
+  BarChart,
   Package,
-  TrendingUp,
+  ArrowUp,
   Search,
   Download,
-  ChevronDown,
+  ArrowDown,
   FileText,
-  Table,
-  FileSpreadsheet,
+  Grid,
+  File,
   AlertCircle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -197,8 +197,8 @@ function ExportDropdown({
 
   const formats: { value: ExportFormat; label: string; icon: React.ElementType }[] = [
     { value: "pdf", label: "PDF", icon: FileText },
-    { value: "xlsx", label: "XLSX", icon: FileSpreadsheet },
-    { value: "csv", label: "CSV", icon: Table },
+    { value: "xlsx", label: "XLSX", icon: File },
+    { value: "csv", label: "CSV", icon: Grid },
   ];
 
   return (
@@ -211,7 +211,7 @@ function ExportDropdown({
       >
         <Download className="w-4 h-4 mr-2" />
         Export
-        <ChevronDown className="w-3 h-3 ml-1" />
+        <ArrowDown className="w-3 h-3 ml-1" />
       </Button>
       {open && (
         <>
@@ -286,7 +286,7 @@ function SalesTab({
         </div>
       )}
 
-      {/* Table */}
+      {/* Grid */}
       <div className="rounded-xl border border-border bg-card overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
@@ -365,7 +365,7 @@ function StockTab({ branchId }: { branchId: string | null }) {
         </div>
       )}
 
-      {/* Table */}
+      {/* Grid */}
       <div className="rounded-xl border border-border bg-card overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
@@ -505,7 +505,7 @@ function ProfitLossTab({
         </div>
       )}
 
-      {/* Table */}
+      {/* Grid */}
       <div className="rounded-xl border border-border bg-card overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
@@ -580,9 +580,9 @@ export default function ReportsPage() {
   const [endDate, setEndDate] = useState(todayStr);
 
   const tabs: { key: ReportTab; label: string; icon: React.ElementType }[] = [
-    { key: "sales", label: "Penjualan", icon: TrendingUp },
+    { key: "sales", label: "Penjualan", icon: ArrowUp },
     { key: "stock", label: "Stok", icon: Package },
-    { key: "profit-loss", label: "Laba & Rugi", icon: BarChart3 },
+    { key: "profit-loss", label: "Laba & Rugi", icon: BarChart },
   ];
 
   return (
@@ -591,7 +591,7 @@ export default function ReportsPage() {
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 px-6 py-4 border-b border-border">
         <div>
           <h2 className="text-xl font-semibold flex items-center gap-2">
-            <BarChart3 className="w-5 h-5" />
+            <BarChart className="w-5 h-5" />
             Laporan
           </h2>
           <p className="text-sm text-muted-foreground mt-0.5">
@@ -653,7 +653,7 @@ export default function ReportsPage() {
       <div className="flex-1 overflow-y-auto p-6">
         {!branchId ? (
           <div className="flex flex-col items-center justify-center h-full text-center p-8">
-            <BarChart3 className="w-12 h-12 text-muted-foreground/40 mb-4" />
+            <BarChart className="w-12 h-12 text-muted-foreground/40 mb-4" />
             <p className="text-muted-foreground">Pilih cabang terlebih dahulu untuk melihat laporan</p>
           </div>
         ) : activeTab === "sales" ? (
