@@ -11,10 +11,10 @@ import type { User } from "@/types";
 import {
   Plus,
   Search,
-  Pencil,
+  Edit,
   Trash2,
-  ChevronLeft,
-  ChevronRight,
+  ChevronFirst,
+  ChevronLast,
   Users,
 } from "lucide-react";
 
@@ -231,7 +231,7 @@ export default function UserListPage() {
                           size="sm"
                           onClick={() => openEditModal(user)}
                         >
-                          <Pencil className="w-4 h-4" />
+                          <Edit className="w-4 h-4" />
                         </Button>
                         <Button
                           variant="ghost"
@@ -267,7 +267,7 @@ export default function UserListPage() {
               disabled={page <= 1}
               onClick={() => setPage((p) => Math.max(1, p - 1))}
             >
-              <ChevronLeft className="w-4 h-4" />
+              <ChevronFirst className="w-4 h-4" />
             </Button>
             <Button
               variant="outline"
@@ -275,7 +275,7 @@ export default function UserListPage() {
               disabled={page >= totalPages}
               onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
             >
-              <ChevronRight className="w-4 h-4" />
+              <ChevronLast className="w-4 h-4" />
             </Button>
           </div>
         </div>

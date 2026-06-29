@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { UserForm } from "@/components/users/user-form";
 import { useUsersStore } from "@/hooks/useUsers";
-import { Pencil } from "lucide-react";
+import { Edit } from "lucide-react";
 
 export default function EditUserPage() {
   const router = useRouter();
@@ -30,7 +30,7 @@ export default function EditUserPage() {
     <div className="max-w-2xl mx-auto p-6">
       <div className="mb-6">
         <h2 className="text-xl font-semibold flex items-center gap-2">
-          <Pencil className="w-5 h-5" />
+          <Edit className="w-5 h-5" />
           Edit User
         </h2>
         <p className="text-sm text-muted-foreground mt-0.5">
