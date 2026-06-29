@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
+import { useAuthStore } from "@/hooks/useAuth";
 
 const navItems = [
   { icon: Layout, label: "Dashboard", href: "/" },
@@ -32,6 +33,7 @@ export function Sidebar() {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const { activeBranch } = useBranchStore();
+  const { logout } = useAuthStore();
   const pathname = usePathname();
   const router = useRouter();
 
@@ -82,6 +84,13 @@ export function Sidebar() {
 
       {/* Footer */}
       <div className="p-2 border-t border-border space-y-1">
+        <button
+          onClick={() => { logout(); router.push("/login"); }}
+          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors hover:bg-red-50 hover:text-red-600 text-muted-foreground"
+        >
+          <LogOut className="w-5 h-5 shrink-0" />
+          {!collapsed && <span>Logout</span>}
+        </button>
         <button
           onClick={() => setCollapsed(!collapsed)}
           className={cn(
