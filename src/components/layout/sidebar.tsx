@@ -13,6 +13,7 @@ import {
   ChevronRight,
   Store,
   SlidersHorizontal,
+  BarChart3,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
@@ -22,6 +23,7 @@ const navItems = [
   { icon: ShoppingCart, label: "POS", href: "/pos" },
   { icon: Package, label: "Products", href: "/products" },
   { icon: Package, label: "Stock", href: "/stock" },
+  { icon: BarChart3, label: "Reports", href: "/reports" },
   { icon: Users, label: "Users", href: "/users" },
   { icon: Settings, label: "Settings", href: "/settings" },
 ];
