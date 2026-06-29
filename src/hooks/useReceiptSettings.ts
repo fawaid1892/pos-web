@@ -1,8 +1,5 @@
 /**
  * Hook untuk pengaturan struk (receipt customization)
- *
- * TODO: Ganti mock dengan API call saat backend sudah siap
- * Endpoint yg ditunggu: GET/PUT /settings/receipt
  */
 
 import { create } from "zustand";
@@ -20,26 +17,19 @@ interface FileTextSettingsState {
   clearError: () => void;
 }
 
-const defaultSettings: FileTextSettings = {
-  id: "rcpt-001",
-  branchId: "br-001",
-  storeName: "Toko POS Retail",
-  storeAddress: "Jl. Merdeka No. 1, Jakarta Pusat",
-  storePhone: "021-12345678",
-  taxId: "01.234.567.8-901.000",
-  headerText: "TERIMA KASIH TELAH BERBELANJA",
-  footerText: "Barang yang sudah dibeli tidak dapat dikembalikan kecuali ada cacat produksi",
-  fontFamily: "mono",
-  fontSize: "md",
-  logoUrl: "",
-  showLogo: false,
-  showHeader: true,
-  showFooter: true,
-  showItemNumber: true,
-  showBarcode: false,
-  paperWidth: "80mm",
-  updatedAt: "2025-06-01T00:00:00Z",
-};
+/** Helper to extract a single item from API responses that may be { data: {...} } or {...} */
+function extractSettings(raw: unknown): FileTextSettings | null {
+  if (!raw || typeof raw !== "object") return null;
+  const obj = raw as Record<string, unknown>;
+  if ("data" in obj && obj.data && typeof obj.data === "object") {
+    return obj.data as FileTextSettings;
+  }
+  // Check if the response itself has the expected fields
+  if ("storeName" in obj || "headerText" in obj) {
+    return obj as unknown as FileTextSettings;
+  }
+  return null;
+}
 
 export const useFileTextSettingsStore = create<FileTextSettingsState>(
   (set) => ({
@@ -48,15 +38,18 @@ export const useFileTextSettingsStore = create<FileTextSettingsState>(
     isSaving: false,
     error: null,
 
-    fetchSettings: async (_branchId: string) => {
+    fetchSettings: async (branchId: string) => {
       set({ isLoading: true, error: null });
       try {
-        // TODO: Ganti dengan API call
-        // const response = await api.get<FileTextSettings>(`/settings/receipt/${branchId}`);
-        // set({ settings: response.data, isLoading: false });
-
-        await new Promise((r) => setTimeout(r, 200));
-        set({ settings: { ...defaultSettings, branchId: _branchId }, isLoading: false });
+        const response = await fetch(`/api/settings/receipt?branchId=${encodeURIComponent(branchId)}`, {
+          cache: "no-store",
+        });
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        const raw = await response.json();
+        const settings = extractSettings(raw);
+        set({ settings, isLoading: false });
       } catch (err) {
         set({
           isLoading: false,
@@ -68,21 +61,27 @@ export const useFileTextSettingsStore = create<FileTextSettingsState>(
     saveSettings: async (data: FileTextSettingsFormData) => {
       set({ isSaving: true, error: null });
       try {
-        // TODO: Ganti dengan API call
-        // const response = await api.put<FileTextSettings>("/settings/receipt", data);
-        // set({ settings: response.data, isSaving: false });
-
-        await new Promise((r) => setTimeout(r, 500));
-        set((state) => ({
-          settings: state.settings
-            ? {
-                ...state.settings,
-                ...data,
-                updatedAt: new Date().toISOString(),
-              }
-            : null,
-          isSaving: false,
-        }));
+        const response = await fetch("/api/settings/receipt", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+        });
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        const raw = await response.json();
+        const savedSettings = extractSettings(raw);
+        if (savedSettings) {
+          set({ settings: savedSettings, isSaving: false });
+        } else {
+          // Fallback: optimistically update local state
+          set((state) => ({
+            settings: state.settings
+              ? { ...state.settings, ...data, updatedAt: new Date().toISOString() }
+              : null,
+            isSaving: false,
+          }));
+        }
       } catch (err) {
         set({
           isSaving: false,

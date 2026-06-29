@@ -1,8 +1,5 @@
 /**
  * Hook untuk manajemen user (CRUD)
- *
- * TODO: Ganti mock dengan API call saat backend sudah siap
- * Endpoint yg ditunggu: GET/POST/PUT/DELETE /users
  */
 
 import { create } from "zustand";
@@ -24,64 +21,23 @@ interface UsersState {
   clearError: () => void;
 }
 
-const mockUsers: User[] = [
-  {
-    id: "usr-001",
-    name: "Admin Toko",
-    email: "admin@tokopos.com",
-    role: "superadmin",
-    phone: "081234567890",
-    isActive: true,
-    createdAt: "2025-01-01T00:00:00Z",
-    updatedAt: "2025-06-01T00:00:00Z",
-  },
-  {
-    id: "usr-002",
-    name: "Kasir Pusat",
-    email: "kasir@tokopos.com",
-    role: "cashier",
-    branchId: "br-001",
-    phone: "081234567891",
-    isActive: true,
-    createdAt: "2025-02-15T00:00:00Z",
-    updatedAt: "2025-05-20T00:00:00Z",
-  },
-  {
-    id: "usr-003",
-    name: "Manajer Cabang",
-    email: "manager@tokopos.com",
-    role: "manager",
-    branchId: "br-002",
-    phone: "081234567892",
-    isActive: true,
-    createdAt: "2025-03-01T00:00:00Z",
-    updatedAt: "2025-06-10T00:00:00Z",
-  },
-  {
-    id: "usr-004",
-    name: "Kasir Cabang",
-    email: "kasir2@tokopos.com",
-    role: "cashier",
-    branchId: "br-002",
-    phone: "081234567893",
-    isActive: false,
-    createdAt: "2025-03-15T00:00:00Z",
-    updatedAt: "2025-06-15T00:00:00Z",
-  },
-  {
-    id: "usr-005",
-    name: "Staff Gudang",
-    email: "staff@tokopos.com",
-    role: "admin",
-    branchId: "br-001",
-    phone: "081234567894",
-    isActive: true,
-    createdAt: "2025-04-01T00:00:00Z",
-    updatedAt: "2025-05-30T00:00:00Z",
-  },
-];
+/** Helper to extract array data from API responses that may be { data: [...] } or [...] */
+function extractUserArray(raw: unknown): User[] {
+  if (Array.isArray(raw)) return raw as User[];
+  if (raw && typeof raw === "object" && "data" in (raw as Record<string, unknown>)) {
+    const data = (raw as Record<string, unknown>).data;
+    if (Array.isArray(data)) return data as User[];
+  }
+  return [];
+}
 
-let nextId = 6;
+/** Helper to extract single item from API responses that may be { data: {...} } or {...} */
+function extractItem<T>(raw: unknown): T | null {
+  if (raw && typeof raw === "object" && "data" in (raw as Record<string, unknown>)) {
+    return (raw as Record<string, unknown>).data as T;
+  }
+  return raw as T;
+}
 
 export const useUsersStore = create<UsersState>((set, get) => ({
   users: [],
@@ -92,13 +48,13 @@ export const useUsersStore = create<UsersState>((set, get) => ({
   fetchUsers: async () => {
     set({ isLoading: true, error: null });
     try {
-      // TODO: Ganti dengan API call
-      // const response = await api.get<User[]>("/users");
-      // set({ users: response.data, isLoading: false });
-
-      // Mock: simulasikan network delay
-      await new Promise((r) => setTimeout(r, 300));
-      set({ users: mockUsers, isLoading: false });
+      const response = await fetch("/api/users", { cache: "no-store" });
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+      const raw = await response.json();
+      const users = extractUserArray(raw);
+      set({ users, isLoading: false });
     } catch (err) {
       set({
         isLoading: false,
@@ -110,28 +66,27 @@ export const useUsersStore = create<UsersState>((set, get) => ({
   createUser: async (data: UserFormData) => {
     set({ isLoading: true, error: null });
     try {
-      // TODO: Ganti dengan API call
-      // const response = await api.post<User>("/users", data);
-      // set((state) => ({ users: [...state.users, response.data], isLoading: false }));
-
-      const now = new Date().toISOString();
-      const newUser: User = {
-        id: `usr-${String(nextId++).padStart(3, "0")}`,
-        name: data.name,
-        email: data.email,
-        role: data.role,
-        branchId: data.branchId,
-        phone: data.phone,
-        isActive: data.isActive,
-        createdAt: now,
-        updatedAt: now,
-      };
-
-      mockUsers.push(newUser);
-      set((state) => ({
-        users: [...state.users, newUser],
-        isLoading: false,
-      }));
+      const response = await fetch("/api/users", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) {
+        const errData = await response.json().catch(() => null);
+        throw new Error(errData?.error || `HTTP ${response.status}: ${response.statusText}`);
+      }
+      const raw = await response.json();
+      const newUser = extractItem<User>(raw);
+      if (newUser) {
+        set((state) => ({
+          users: [...state.users, newUser],
+          isLoading: false,
+        }));
+      } else {
+        // If we can't extract a single item, refetch the full list
+        await get().fetchUsers();
+        set({ isLoading: false });
+      }
     } catch (err) {
       set({
         isLoading: false,
@@ -143,34 +98,26 @@ export const useUsersStore = create<UsersState>((set, get) => ({
   updateUser: async (id: string, data: Partial<UserFormData>) => {
     set({ isLoading: true, error: null });
     try {
-      // TODO: Ganti dengan API call
-      // const response = await api.put<User>(`/users/${id}`, data);
-      // set((state) => ({
-      //   users: state.users.map((u) => (u.id === id ? response.data : u)),
-      //   isLoading: false,
-      // }));
-
-      const index = mockUsers.findIndex((u) => u.id === id);
-      if (index !== -1) {
-        mockUsers[index] = {
-          ...mockUsers[index],
-          ...data,
-          updatedAt: new Date().toISOString(),
-        };
+      const response = await fetch(`/api/users/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) {
+        const errData = await response.json().catch(() => null);
+        throw new Error(errData?.error || `HTTP ${response.status}: ${response.statusText}`);
       }
-
-      set((state) => ({
-        users: state.users.map((u) =>
-          u.id === id
-            ? {
-                ...u,
-                ...data,
-                updatedAt: new Date().toISOString(),
-              }
-            : u
-        ),
-        isLoading: false,
-      }));
+      const raw = await response.json();
+      const updatedUser = extractItem<User>(raw);
+      if (updatedUser) {
+        set((state) => ({
+          users: state.users.map((u) => (u.id === id ? updatedUser : u)),
+          isLoading: false,
+        }));
+      } else {
+        await get().fetchUsers();
+        set({ isLoading: false });
+      }
     } catch (err) {
       set({
         isLoading: false,
@@ -182,12 +129,13 @@ export const useUsersStore = create<UsersState>((set, get) => ({
   deleteUser: async (id: string) => {
     set({ isLoading: true, error: null });
     try {
-      // TODO: Ganti dengan API call
-      // await api.delete(`/users/${id}`);
-
-      const userIndex = mockUsers.findIndex((u) => u.id === id);
-      if (userIndex !== -1) mockUsers.splice(userIndex, 1);
-
+      const response = await fetch(`/api/users/${id}`, {
+        method: "DELETE",
+      });
+      if (!response.ok) {
+        const errData = await response.json().catch(() => null);
+        throw new Error(errData?.error || `HTTP ${response.status}: ${response.statusText}`);
+      }
       set((state) => ({
         users: state.users.filter((u) => u.id !== id),
         isLoading: false,
