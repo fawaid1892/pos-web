@@ -11,8 +11,8 @@ import {
   Search,
   Edit,
   Trash2,
-  ChevronFirst,
-  ChevronLast,
+  ChevronLeft,
+  ChevronRight,
   Package,
 } from "lucide-react";
 

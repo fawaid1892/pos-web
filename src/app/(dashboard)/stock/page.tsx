@@ -10,9 +10,9 @@ import {
   Package,
   Search,
   ArrowUpDown,
-  ArrowLeftRight,
-  ChevronFirst,
-  ChevronLast,
+  Edit,
+    ChevronLeft,
+    ChevronRight,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
