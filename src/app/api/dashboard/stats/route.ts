@@ -10,7 +10,7 @@ export async function GET(request: NextRequest) {
 
   try {
     const res = await fetch(
-      `http://localhost:8080/api/v1/dashboard/stats?branch_id=${branchId}`,
+      `${process.env.BACKEND_API_URL || "http://localhost:8080"}/api/v1/dashboard/stats?branch_id=${branchId}`,
       {
         headers: {
           "Content-Type": "application/json",

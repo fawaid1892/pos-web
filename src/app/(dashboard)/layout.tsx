@@ -10,7 +10,7 @@ import { useWebSocket } from "@/hooks/useWebSocket";
 function WebSocketListener() {
   const queryClient = useQueryClient();
 
-  useWebSocket("ws://localhost:8080/api/v1/ws", {
+  useWebSocket(`${process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8080"}`.replace("http", "ws") + "/api/v1/ws", {
     onEvent: (event) => {
       const type = event?.type as string | undefined;
 
