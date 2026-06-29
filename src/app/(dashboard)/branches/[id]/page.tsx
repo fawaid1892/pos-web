@@ -16,6 +16,9 @@ import {
   Users,
   Building2,
   Loader,
+  Percent,
+  Calendar,
+  Tag,
 } from "lucide-react";
 
 // ─── Provinsi/Kota types ──────────────────────────────────────────────────────
@@ -52,6 +55,138 @@ const roleLabel = (role: string) => {
   };
   return map[role] || role;
 };
+
+// ─── Promotion types for the section ──────────────────────────────────────────
+
+interface BranchPromotion {
+  id: string;
+  name: string;
+  type: string;
+  discount_value: number;
+  discount_type: string;
+  start_date: string;
+  end_date: string;
+  is_active: boolean;
+  scope: string;
+}
+
+const PROMOTION_TYPE_LABELS: Record<string, string> = {
+  voucher: "Voucher",
+  bundling: "Bundling",
+  potongan_harga: "Potongan Harga",
+  buy_x_get_y: "Buy X Get Y",
+  min_purchase: "Min. Pembelian",
+};
+
+const SCOPE_LABELS: Record<string, string> = {
+  all: "Semua Cabang",
+  province: "By Provinsi",
+  city: "By Kota",
+  selected: "Cabang Terpilih",
+};
+
+// ─── Branch Promotions Section Component ──────────────────────────────────────
+
+function BranchPromotionsSection({ branchId }: { branchId: string }) {
+  const [promotions, setPromotions] = useState<BranchPromotion[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadPromotions() {
+      setIsLoading(true);
+      try {
+        const res = await fetch(`/api/branches/${branchId}/promotions`, {
+          cache: "no-store",
+        });
+        if (!res.ok) throw new Error("Failed to load promotions");
+        const json = await res.json();
+        const data = Array.isArray(json) ? json : json?.data ?? [];
+        setPromotions(data);
+      } catch (err) {
+        console.error("Failed to load branch promotions:", err);
+        setPromotions([]);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    loadPromotions();
+  }, [branchId]);
+
+  const isExpired = (endDate: string) => new Date(endDate) < new Date();
+  const isPromoActive = (p: BranchPromotion) => p.is_active && !isExpired(p.end_date);
+
+  const formatDateShort = (dateStr: string) => {
+    const d = new Date(dateStr);
+    return d.toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" });
+  };
+
+  return (
+    <section>
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-lg font-semibold flex items-center gap-2">
+          <Percent className="w-5 h-5" />
+          Promosi Aktif
+        </h3>
+      </div>
+
+      {isLoading ? (
+        <div className="flex items-center gap-2 text-sm text-muted-foreground py-4">
+          <Loader className="w-4 h-4 animate-spin" />
+          Memuat promosi...
+        </div>
+      ) : promotions.length === 0 ? (
+        <div className="text-sm text-muted-foreground py-4 bg-accent/30 rounded-lg text-center">
+          <Percent className="w-8 h-8 mx-auto mb-2 text-muted-foreground/40" />
+          <p>Tidak ada promosi yang aktif untuk cabang ini.</p>
+        </div>
+      ) : (
+        <div className="grid gap-3 sm:grid-cols-2">
+          {promotions.filter(isPromoActive).map((p) => (
+            <div
+              key={p.id}
+              className="rounded-lg border border-border p-4 hover:bg-accent/30 transition-colors"
+            >
+              <div className="flex items-start justify-between gap-2 mb-2">
+                <div className="min-w-0">
+                  <p className="font-medium text-sm truncate">{p.name}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    {PROMOTION_TYPE_LABELS[p.type] || p.type}
+                  </p>
+                </div>
+                <span className="shrink-0 inline-flex items-center gap-1 rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700 dark:bg-green-900/30 dark:text-green-400">
+                  <span className="w-1.5 h-1.5 rounded-full bg-green-500" />
+                  Aktif
+                </span>
+              </div>
+              <div className="flex items-center gap-2 text-xs text-muted-foreground mb-2">
+                <Tag className="w-3 h-3" />
+                <span>
+                  {p.discount_type === "persen"
+                    ? `${p.discount_value}%`
+                    : `Rp ${p.discount_value.toLocaleString("id-ID")}`}
+                </span>
+                <span className="text-border">|</span>
+                <Calendar className="w-3 h-3" />
+                <span>
+                  {formatDateShort(p.start_date)} — {formatDateShort(p.end_date)}
+                </span>
+              </div>
+              <div className="text-xs text-muted-foreground/70">
+                Cakupan: <span className="font-medium">{SCOPE_LABELS[p.scope] || p.scope}</span>
+              </div>
+            </div>
+          ))}
+          {promotions.filter(isPromoActive).length === 0 && (
+            <div className="col-span-full text-sm text-muted-foreground py-4 bg-accent/30 rounded-lg text-center">
+              <Percent className="w-8 h-8 mx-auto mb-2 text-muted-foreground/40" />
+              <p>Tidak ada promosi yang aktif untuk cabang ini.</p>
+            </div>
+          )}
+        </div>
+      )}
+    </section>
+  );
+}
 
 // ─── Page Component ───────────────────────────────────────────────────────────
 
@@ -532,6 +667,11 @@ export default function BranchDetailPage() {
             )}
           </section>
         )}
+
+        {/* ═══════════════════════════════════════════════════════════════════ */}
+        {/* SECTION C — Active Promotions */}
+        {/* ═══════════════════════════════════════════════════════════════════ */}
+        {!isNewBranch && <BranchPromotionsSection branchId={branchId} />}
       </div>
 
       {/* ─── Assign User Modal ──────────────────────────────────────────────── */}
