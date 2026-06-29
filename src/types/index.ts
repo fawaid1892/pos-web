@@ -171,3 +171,19 @@ export interface PaginatedResponse<T> extends ApiResponse<T[]> {
   limit: number;
   totalPages: number;
 }
+
+// ─── Role & Permission ─────────────────────────────────────────────────────────
+export interface Permission {
+  id: string;
+  name: string;    // e.g. "products.read"
+  label: string;   // e.g. "Lihat Produk"
+  group: string;   // e.g. "products"
+}
+
+export interface Role {
+  id: string;
+  name: string;
+  description: string;
+  is_system: boolean;
+  permissions?: Permission[];
+}

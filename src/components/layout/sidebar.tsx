@@ -14,6 +14,7 @@ import {
   ShoppingBag,
   Sliders,
   BarChart,
+  Activity,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
@@ -26,6 +27,7 @@ const navItems = [
   { icon: Package, label: "Stock", href: "/stock" },
   { icon: BarChart, label: "Reports", href: "/reports" },
   { icon: Users, label: "Users", href: "/users" },
+  { icon: Activity, label: "Roles", href: "/roles" },
   { icon: Settings, label: "Settings", href: "/settings" },
 ];
 
