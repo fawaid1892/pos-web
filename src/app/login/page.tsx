@@ -6,7 +6,7 @@ import { useAuthStore } from "@/hooks/useAuth";
 import { LogIn, Eye, EyeOff, AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-export default function LoginPage() {
+function LoginPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { login, logout, isAuthenticated, isLoading, error, clearError } =
@@ -190,5 +190,32 @@ export default function LoginPage() {
         </p>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-screen items-center justify-center bg-background p-4">
+          <div className="w-full max-w-md">
+            <div className="rounded-2xl border border-border bg-card shadow-lg">
+              <div className="px-8 pt-8 pb-4 text-center">
+                <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-xl bg-muted animate-pulse" />
+                <div className="mx-auto h-6 w-48 bg-muted rounded animate-pulse" />
+                <div className="mx-auto mt-2 h-4 w-64 bg-muted rounded animate-pulse" />
+              </div>
+              <div className="px-8 pb-8 space-y-4">
+                <div className="h-10 w-full bg-muted rounded-lg animate-pulse" />
+                <div className="h-10 w-full bg-muted rounded-lg animate-pulse" />
+                <div className="h-10 w-full bg-muted rounded-lg animate-pulse" />
+              </div>
+            </div>
+          </div>
+        </div>
+      }
+    >
+      <LoginPageContent />
+    </Suspense>
   );
 }
