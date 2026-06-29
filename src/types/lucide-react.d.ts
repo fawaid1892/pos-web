@@ -49,7 +49,11 @@ declare module "lucide-react" {
   export const Smartphone: FC<SVGProps<SVGSVGElement>>;
   export const Trash2: FC<SVGProps<SVGSVGElement>>;
   export const Upload: FC<SVGProps<SVGSVGElement>>;
+  export const Building2: FC<SVGProps<SVGSVGElement>>;
+  export const Percent: FC<SVGProps<SVGSVGElement>>;
+  export const Ticket: FC<SVGProps<SVGSVGElement>>;
   export const UserPlus: FC<SVGProps<SVGSVGElement>>;
+  export const UserX: FC<SVGProps<SVGSVGElement>>;
   export const Users: FC<SVGProps<SVGSVGElement>>;
   export const X: FC<SVGProps<SVGSVGElement>>;
 }
