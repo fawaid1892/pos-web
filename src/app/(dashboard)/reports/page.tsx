@@ -195,7 +195,7 @@ function ExportDropdown({
   };
 
   const formats: { value: ExportFormat; label: string; icon: React.ElementType }[] = [
-    { value: "pdf", label: "PDF", icon: FileTextText },
+    { value: "pdf", label: "PDF", icon: FileText },
     { value: "xlsx", label: "XLSX", icon: FileText },
     { value: "csv", label: "CSV", icon: Layout },
   ];
