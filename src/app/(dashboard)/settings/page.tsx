@@ -7,7 +7,7 @@ import {
   Settings,
   Printer,
   Save,
-  MapPin,
+  MapPinned,
   Check,
   X,
   ArrowRight,
@@ -53,7 +53,7 @@ function saveGeneral(data: GeneralSettings) {
 type Tab = "general" | "branch" | "receipt";
 
 const tabs: { id: Tab; label: string; icon: React.ElementType }[] = [
-  { id: "general", label: "General", icon: MapPin },
+  { id: "general", label: "General", icon: MapPinned },
   { id: "branch", label: "Branch", icon: Settings },
   { id: "receipt", label: "FileText", icon: Printer },
 ];
@@ -270,7 +270,7 @@ export default function SettingsPage() {
                         </div>
                         <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1 text-xs text-muted-foreground">
                           <span className="flex items-center gap-1">
-                            <MapPin className="w-3 h-3" />
+                            <MapPinned className="w-3 h-3" />
                             {branch.address || "No address"}
                           </span>
                           {branch.code && (
