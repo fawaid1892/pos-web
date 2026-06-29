@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const BACKEND_URL = process.env.BACKEND_API_URL || "http://localhost:8080/api/v1/products";
+const BASE_URL = process.env.BACKEND_API_URL || process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8080";
 
 export async function PUT(
   request: NextRequest,
@@ -13,7 +13,7 @@ export async function PUT(
       "Content-Type": "application/json",
     };
     if (token) headers["Authorization"] = `Bearer ${token}`;
-    const url = `${BACKEND_URL}/${params.id}`;
+    const url = `${BASE_URL}/api/v1/products/${params.id}`;
 
     const res = await fetch(url, {
       method: "PUT",
@@ -46,7 +46,7 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    const url = `${BACKEND_URL}/${params.id}`;
+    const url = `${BASE_URL}/api/v1/products/${params.id}`;
     const token = request.cookies.get("auth_token")?.value;
     const headers: Record<string, string> = {
       "Content-Type": "application/json",

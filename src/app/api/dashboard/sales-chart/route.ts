@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
+const BASE_URL = process.env.BACKEND_API_URL || process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8080";
+
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const branchId = searchParams.get("branch_id");
@@ -11,7 +13,7 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const url = `${process.env.BACKEND_API_URL || "http://localhost:8080"}/api/v1/dashboard/sales-chart?start=${start}&end=${end}&branch_id=${branchId}`;
+    const url = `${BASE_URL}/api/v1/dashboard/sales-chart?start=${start}&end=${end}&branch_id=${branchId}`;
 
     const token = request.cookies.get("auth_token")?.value;
     const headers: Record<string, string> = {

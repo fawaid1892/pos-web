@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const BACKEND_URL = process.env.BACKEND_API_URL || "http://localhost:8080";
+const BASE_URL = process.env.BACKEND_API_URL || process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8080";
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    let backendUrl = `${BACKEND_URL}/api/v1/branches/${branchId}/reports/sales/export?format=${format}`;
+    let backendUrl = `${BASE_URL}/api/v1/branches/${branchId}/reports/sales/export?format=${format}`;
     if (start) backendUrl += `&start=${start}`;
     if (end) backendUrl += `&end=${end}`;
 

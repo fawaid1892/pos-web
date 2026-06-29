@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const BACKEND_URL = `${process.env.BACKEND_API_URL || "http://localhost:8080"}/api/v1`;
+const BASE_URL = process.env.BACKEND_API_URL || process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8080";
 
 export async function POST(request: NextRequest) {
   try {
@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const url = `${BACKEND_URL}/branches/${branchId}/inventory/adjustment`;
+    const url = `${BASE_URL}/api/v1/branches/${branchId}/inventory/adjustment`;
 
     const token = request.cookies.get("auth_token")?.value;
     const headers: Record<string, string> = {

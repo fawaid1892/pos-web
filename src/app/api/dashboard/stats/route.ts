@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
+const BASE_URL = process.env.BACKEND_API_URL || process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8080";
+
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const branchId = searchParams.get("branch_id");
@@ -16,7 +18,7 @@ export async function GET(request: NextRequest) {
     if (token) headers["Authorization"] = `Bearer ${token}`;
 
     const res = await fetch(
-      `${process.env.BACKEND_API_URL || "http://localhost:8080"}/api/v1/dashboard/stats?branch_id=${branchId}`,
+      `${BASE_URL}/api/v1/dashboard/stats?branch_id=${branchId}`,
       {
         headers,
         cache: "no-store",

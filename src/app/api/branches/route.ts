@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const BACKEND_URL = process.env.BACKEND_API_URL || "http://localhost:8080/api/v1/branches";
+const BASE_URL = process.env.BACKEND_API_URL || process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8080";
 
 export async function GET(request: NextRequest) {
   try {
@@ -12,7 +12,9 @@ export async function GET(request: NextRequest) {
 
     const searchParams = request.nextUrl.searchParams;
     const queryString = searchParams.toString();
-    const url = queryString ? `${BACKEND_URL}?${queryString}` : BACKEND_URL;
+    const url = queryString
+      ? `${BASE_URL}/api/v1/branches?${queryString}`
+      : `${BASE_URL}/api/v1/branches`;
 
     const res = await fetch(url, {
       headers,
@@ -48,7 +50,7 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json();
 
-    const res = await fetch(BACKEND_URL, {
+    const res = await fetch(`${BASE_URL}/api/v1/branches`, {
       method: "POST",
       headers,
       body: JSON.stringify(body),

@@ -1,12 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const BACKEND_URL = process.env.BACKEND_API_URL || "http://localhost:8080/api/v1/users";
+const BASE_URL = process.env.BACKEND_API_URL || process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8080";
 
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
     const queryString = searchParams.toString();
-    const url = queryString ? `${BACKEND_URL}?${queryString}` : BACKEND_URL;
+    const url = queryString
+      ? `${BASE_URL}/api/v1/users?${queryString}`
+      : `${BASE_URL}/api/v1/users`;
 
     const token = request.cookies.get("auth_token")?.value;
     const headers: Record<string, string> = {
@@ -47,7 +49,7 @@ export async function POST(request: NextRequest) {
     };
     if (token) headers["Authorization"] = `Bearer ${token}`;
 
-    const res = await fetch(BACKEND_URL, {
+    const res = await fetch(`${BASE_URL}/api/v1/users`, {
       method: "POST",
       headers,
       body: JSON.stringify(body),
