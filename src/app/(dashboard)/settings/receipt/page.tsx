@@ -4,7 +4,7 @@ import { useEffect, useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { FileTextPreview } from "@/components/receipt/receipt-preview";
-import { useFileTextSettingsStore } from "@/hooks/useFileTextSettings";
+import { useFileTextSettingsStore } from "@/hooks/useReceiptSettings";
 import { useBranchStore } from "@/hooks/useBranch";
 import type { FileTextSettingsFormData } from "@/types";
 import { cn } from "@/lib/utils";

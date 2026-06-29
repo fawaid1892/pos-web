@@ -1,7 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { useBranchShoppingBag } from "@/hooks/useBranch";
+import { useBranchStore } from "@/hooks/useBranch";
 import {
   Layout,
   ShoppingCart,
@@ -31,7 +31,7 @@ const navItems = [
 export function Sidebar() {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const { activeBranch } = useBranchShoppingBag();
+  const { activeBranch } = useBranchStore();
   const pathname = usePathname();
   const router = useRouter();
 

@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { useTransferStock } from "@/hooks/useInventoryQuery";
 import { useProducts } from "@/hooks/useProductsQuery";
-import { useBranchShoppingBag } from "@/hooks/useBranch";
+import { useBranchStore } from "@/hooks/useBranch";
 import {
   ArrowRight,
   ArrowLeft,
@@ -17,7 +17,7 @@ import { cn } from "@/lib/utils";
 
 export default function StockTransferPage() {
   const router = useRouter();
-  const { branches, activeBranch } = useBranchShoppingBag();
+  const { branches, activeBranch } = useBranchStore();
   const { data: products = [] } = useProducts();
   const transferMutation = useTransferStock();
 

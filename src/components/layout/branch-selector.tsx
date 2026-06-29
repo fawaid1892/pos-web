@@ -2,12 +2,12 @@
 
 import { useState } from "react";
 import { ArrowDown, ShoppingBag, Check } from "lucide-react";
-import { useBranchShoppingBag } from "@/hooks/useBranch";
+import { useBranchStore } from "@/hooks/useBranch";
 import { cn } from "@/lib/utils";
 
 export function BranchSelector() {
   const [open, setOpen] = useState(false);
-  const { branches, activeBranch, setActiveBranch } = useBranchShoppingBag();
+  const { branches, activeBranch, setActiveBranch } = useBranchStore();
 
   return (
     <div className="relative">

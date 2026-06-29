@@ -5,20 +5,17 @@ import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import {
   Settings,
-  Globe,
-  ShoppingBag,
   Printer,
   Save,
-  Home,
   MapPin,
-  Phone,
-  CheckCircle,
-  XCircle,
+  Check,
+  X,
   ArrowRight,
+  Home,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { useBranchShoppingBag } from "@/hooks/useBranch";
+import { useBranchStore } from "@/hooks/useBranch";
 
 // ─── LocalStorage helpers ──────────────────────────────────────────────────────
 
@@ -56,8 +53,8 @@ function saveGeneral(data: GeneralSettings) {
 type Tab = "general" | "branch" | "receipt";
 
 const tabs: { id: Tab; label: string; icon: React.ElementType }[] = [
-  { id: "general", label: "General", icon: Globe },
-  { id: "branch", label: "Branch", icon: ShoppingBag },
+  { id: "general", label: "General", icon: MapPin },
+  { id: "branch", label: "Branch", icon: Settings },
   { id: "receipt", label: "FileText", icon: Printer },
 ];
 
@@ -74,7 +71,7 @@ const currencyOptions = [
 
 export default function SettingsPage() {
   const router = useRouter();
-  const { branches, isLoading: branchesLoading, fetchBranches } = useBranchShoppingBag();
+  const { branches, isLoading: branchesLoading, fetchBranches } = useBranchStore();
   const [activeTab, setActiveTab] = useState<Tab>("general");
 
   // General settings state
@@ -108,7 +105,7 @@ export default function SettingsPage() {
         {/* Header */}
         <div className="mb-6">
           <h2 className="text-xl font-semibold flex items-center gap-2">
-            <SettingsIcon className="w-5 h-5" />
+            <Settings className="w-5 h-5" />
             Settings
           </h2>
           <p className="text-sm text-muted-foreground mt-0.5">
@@ -200,7 +197,7 @@ export default function SettingsPage() {
                   </Button>
                   {saved && (
                     <span className="text-xs text-green-600 flex items-center gap-1">
-                      <CheckCircle className="w-3.5 h-3.5" />
+                      <Check className="w-3.5 h-3.5" />
                       Saved to local storage
                     </span>
                   )}
@@ -260,12 +257,12 @@ export default function SettingsPage() {
                           >
                             {branch.isActive ? (
                               <>
-                                <CheckCircle className="w-3 h-3 mr-0.5" />
+                                <Check className="w-3 h-3 mr-0.5" />
                                 Active
                               </>
                             ) : (
                               <>
-                                <XCircle className="w-3 h-3 mr-0.5" />
+                                <X className="w-3 h-3 mr-0.5" />
                                 Inactive
                               </>
                             )}
@@ -283,7 +280,7 @@ export default function SettingsPage() {
                           )}
                           {branch.phone && (
                             <span className="flex items-center gap-1">
-                              <Phone className="w-3 h-3" />
+                              <Save className="w-3 h-3" />
                               {branch.phone}
                             </span>
                           )}
@@ -327,23 +324,23 @@ export default function SettingsPage() {
                 </p>
                 <ul className="space-y-2 text-sm text-muted-foreground">
                   <li className="flex items-center gap-2">
-                    <CheckCircle className="w-3.5 h-3.5 text-green-500 shrink-0" />
-                    ShoppingBag identity (name, address, phone, tax ID)
+                    <Check className="w-3.5 h-3.5 text-green-500 shrink-0" />
+                    Branch identity (name, address, phone, tax ID)
                   </li>
                   <li className="flex items-center gap-2">
-                    <CheckCircle className="w-3.5 h-3.5 text-green-500 shrink-0" />
+                    <Check className="w-3.5 h-3.5 text-green-500 shrink-0" />
                     Header &amp; footer text
                   </li>
                   <li className="flex items-center gap-2">
-                    <CheckCircle className="w-3.5 h-3.5 text-green-500 shrink-0" />
+                    <Check className="w-3.5 h-3.5 text-green-500 shrink-0" />
                     Font family, size, and paper width (58mm / 80mm)
                   </li>
                   <li className="flex items-center gap-2">
-                    <CheckCircle className="w-3.5 h-3.5 text-green-500 shrink-0" />
+                    <Check className="w-3.5 h-3.5 text-green-500 shrink-0" />
                     Logo upload
                   </li>
                   <li className="flex items-center gap-2">
-                    <CheckCircle className="w-3.5 h-3.5 text-green-500 shrink-0" />
+                    <Check className="w-3.5 h-3.5 text-green-500 shrink-0" />
                     Barcode display option
                   </li>
                 </ul>
