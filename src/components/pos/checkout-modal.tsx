@@ -118,7 +118,10 @@ export function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
       const res = await fetch("/api/promotions/validate-voucher", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code }),
+        body: JSON.stringify({
+            code,
+            branch_id: activeBranch?.id || undefined,
+          }),
       });
 
       const json = await res.json();
