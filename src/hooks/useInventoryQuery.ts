@@ -6,7 +6,7 @@ import { useBranchStore } from "@/hooks/useBranch";
 
 // ─── Fetch inventory ─────────────────────────────────────────────────────────
 
-async function fetchInventory(branchId: string): Promise<InventoryItem[]> {
+async function fetchInventory(branchId: number): Promise<InventoryItem[]> {
   const res = await fetch(`/api/inventory?branchId=${encodeURIComponent(branchId)}`);
   if (!res.ok) {
     const err = await res.json().catch(() => ({ error: "Failed to fetch inventory" }));
@@ -19,7 +19,7 @@ async function fetchInventory(branchId: string): Promise<InventoryItem[]> {
 
 export function useInventory() {
   const activeBranch = useBranchStore((state) => state.activeBranch);
-  const branchId = activeBranch?.id ?? "";
+  const branchId = activeBranch?.id ?? 0;
 
   return useQuery({
     queryKey: ["inventory", branchId],
@@ -31,7 +31,7 @@ export function useInventory() {
 
 // ─── Adjust stock ────────────────────────────────────────────────────────────
 
-async function adjustStock(data: AdjustmentFormData & { branchId: string }): Promise<void> {
+async function adjustStock(data: AdjustmentFormData & { branchId: number }): Promise<void> {
   const res = await fetch("/api/inventory/adjustment", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -46,7 +46,7 @@ async function adjustStock(data: AdjustmentFormData & { branchId: string }): Pro
 export function useAdjustStock() {
   const queryClient = useQueryClient();
   const activeBranch = useBranchStore((state) => state.activeBranch);
-  const branchId = activeBranch?.id ?? "";
+  const branchId = activeBranch?.id ?? 0;
 
   return useMutation({
     mutationFn: (data: AdjustmentFormData) =>

@@ -62,7 +62,7 @@ export function UserFormModal({ mode, user, open = true, onClose, onCancel, onSu
         full_name: user.full_name || user.name || "",
         password: "",
         role: user.role === "superadmin" || user.role === "manager" ? user.role === "superadmin" ? "admin" : "kasir" : user.role,
-        branchId: user.branchId || "",
+        branchId: String(user.branchId || ""),
       });
     } else {
       setForm({ username: "", full_name: "", password: "", role: "kasir", branchId: "" });
@@ -90,7 +90,7 @@ export function UserFormModal({ mode, user, open = true, onClose, onCancel, onSu
       username: form.username,
       full_name: form.full_name,
       role: form.role,
-      branch_id: form.branchId || undefined,
+      branch_id: form.branchId ? Number(form.branchId) : undefined,
     };
     if (form.password) payload.password = form.password;
 

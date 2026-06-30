@@ -367,8 +367,8 @@ export default function FileTextSettingsPage() {
               <div className="flex justify-center">
                 <FileTextPreview
                   settings={{
-                    id: "",
-                    branchId: activeBranch?.id || "",
+                    id: 0,
+                    branchId: activeBranch?.id || 0,
                     updatedAt: new Date().toISOString(),
                     ...form,
                   }}

@@ -61,7 +61,7 @@ export function ProductFormModal({
         unit: product.unit || "PCS",
         price: String(product.price ?? ""),
         cost_price: String(product.costPrice ?? ""),
-        category_id: product.categoryId || "",
+        category_id: String(product.categoryId || ""),
         stock: String(product.stock ?? "0"),
       });
     } else {

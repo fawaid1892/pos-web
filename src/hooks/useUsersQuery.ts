@@ -56,7 +56,7 @@ async function updateUser({
   id,
   data,
 }: {
-  id: string;
+  id: number;
   data: Partial<UserFormData>;
 }): Promise<User> {
   const res = await fetch(`/api/users/${id}`, {
@@ -83,7 +83,7 @@ export function useUpdateUser() {
 
 // ─── Delete user ──────────────────────────────────────────────────────────────
 
-async function deleteUser(id: string): Promise<void> {
+async function deleteUser(id: number): Promise<void> {
   const res = await fetch(`/api/users/${id}`, { method: "DELETE" });
   if (!res.ok) {
     const err = await res.json().catch(() => ({ error: "Failed to delete user" }));

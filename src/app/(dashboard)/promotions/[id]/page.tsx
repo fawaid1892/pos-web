@@ -63,7 +63,7 @@ interface FormData {
   scope: string;
   province_id: string;
   city_id: string;
-  branch_ids: string[];
+  branch_ids: number[];
   is_active: boolean;
   max_uses: number;
 }
@@ -206,7 +206,7 @@ export default function PromotionDetailPage() {
           scope: promo.scope || "all",
           province_id: promo.province_id || "",
           city_id: promo.city_id || "",
-          branch_ids: promo.branches?.map((b: { branch_id: string }) => b.branch_id) || [],
+          branch_ids: promo.branches?.map((b: { branch_id: number }) => b.branch_id) || [],
           is_active: promo.is_active ?? true,
           max_uses: promo.max_uses || 0,
         });
@@ -242,7 +242,7 @@ export default function PromotionDetailPage() {
     }));
   };
 
-  const handleBranchToggle = (branchId: string) => {
+  const handleBranchToggle = (branchId: number) => {
     setFormData((prev) => ({
       ...prev,
       branch_ids: prev.branch_ids.includes(branchId)

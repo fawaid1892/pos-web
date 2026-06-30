@@ -1,6 +1,6 @@
 // ─── Branch ───────────────────────────────────────────────────────────────────
 export interface Branch {
-  id: string;
+  id: number;
   name: string;
   code: string;
   address: string;
@@ -28,13 +28,13 @@ export interface BranchFormData {
 
 // ─── User & Auth ──────────────────────────────────────────────────────────────
 export interface User {
-  id: string;
+  id: number;
   username?: string;   // new field, optional for backward compat
   full_name?: string;  // new field, optional for backward compat
   name: string;
   email: string;
   role: "admin" | "cashier" | "manager" | "superadmin" | "owner";
-  branchId?: string;
+  branchId?: number;
   branch_name?: string;
   avatar?: string;
   phone?: string;
@@ -47,18 +47,18 @@ export interface User {
 export interface AuthSession {
   user: User;
   token: string;
-  activeBranchId: string;
+  activeBranchId: number;
 }
 
 // ─── Product ──────────────────────────────────────────────────────────────────
 export interface Product {
-  id: string;
+  id: number;
   code: string;
   name: string;
   description?: string;
   price: number;
   costPrice: number;
-  categoryId: string;
+  categoryId: number;
   unit: string;
   stock: number;
   barcode?: string;
@@ -67,16 +67,16 @@ export interface Product {
 }
 
 export interface Category {
-  id: string;
+  id: number;
   name: string;
-  parentId?: string;
+  parentId?: number;
 }
 
 // ─── Transaction ──────────────────────────────────────────────────────────────
 export type PaymentMethod = "cash" | "qris" | "debit" | "credit" | "ewallet";
 
 export interface TransactionItem {
-  productId: string;
+  productId: number;
   productName: string;
   quantity: number;
   price: number;
@@ -86,7 +86,7 @@ export interface TransactionItem {
 }
 
 export interface AppliedPromotion {
-  promotionId: string;
+  promotionId: number;
   promotionName: string;
   type: string;
   discountValue: number;
@@ -94,9 +94,9 @@ export interface AppliedPromotion {
 }
 
 export interface Transaction {
-  id: string;
-  branchId: string;
-  cashierId: string;
+  id: number;
+  branchId: number;
+  cashierId: number;
   items: TransactionItem[];
   subtotal: number;
   discount: number;
@@ -111,8 +111,8 @@ export interface Transaction {
 
 // ─── FileText Settings ─────────────────────────────────────────────────────────
 export interface FileTextSettings {
-  id: string;
-  branchId: string;
+  id: number;
+  branchId: number;
   headerText: string;
   footerText: string;
   fontFamily: "mono" | "sans" | "serif";
@@ -145,23 +145,23 @@ export type UserFormData = Omit<User, "id" | "createdAt" | "updatedAt"> & {
 
 // ─── Inventory ────────────────────────────────────────────────────────────────
 export interface InventoryItem {
-  id: string;
-  productId: string;
+  id: number;
+  productId: number;
   productName: string;
   barcode?: string;
   categoryName?: string;
   stockQty: number;
   minStock: number;
-  branchId: string;
+  branchId: number;
   branchName?: string;
   updatedAt: string;
 }
 
 export interface StockMutation {
-  id: string;
-  productId: string;
-  fromBranchId?: string;
-  toBranchId?: string;
+  id: number;
+  productId: number;
+  fromBranchId?: number;
+  toBranchId?: number;
   quantity: number;
   type: "in" | "out" | "transfer" | "adjustment";
   note?: string;
@@ -169,16 +169,16 @@ export interface StockMutation {
 }
 
 export interface AdjustmentFormData {
-  productId: string;
+  productId: number;
   type: "in" | "out";
   quantity: number;
   notes?: string;
 }
 
 export interface TransferFormData {
-  productId: string;
-  fromBranchId: string;
-  toBranchId: string;
+  productId: number;
+  fromBranchId: number;
+  toBranchId: number;
   quantity: number;
   notes?: string;
 }
@@ -200,7 +200,7 @@ export interface PaginatedResponse<T> extends ApiResponse<T[]> {
 
 // ─── Promotion ───────────────────────────────────────────────────────────────
 export interface Promotion {
-  id: string;
+  id: number;
   name: string;
   type: 'voucher' | 'bundling' | 'potongan_harga' | 'buy_x_get_y' | 'min_purchase';
   code?: string;
@@ -212,9 +212,9 @@ export interface Promotion {
   start_date: string;
   end_date: string;
   scope: 'all' | 'province' | 'city' | 'selected';
-  province_id?: string;
-  city_id?: string;
-  branches?: { promotion_id: string; branch_id: string }[];
+  province_id?: number;
+  city_id?: number;
+  branches?: { promotion_id: number; branch_id: number }[];
   is_active: boolean;
   max_uses: number;
   current_uses: number;
@@ -234,9 +234,9 @@ export interface PromotionFormData {
   start_date: string;
   end_date: string;
   scope: string;
-  province_id?: string;
-  city_id?: string;
-  branch_ids?: string[];
+  province_id?: number;
+  city_id?: number;
+  branch_ids?: number[];
   is_active: boolean;
   max_uses: number;
 }
@@ -251,14 +251,14 @@ export interface ValidateVoucherResponse {
 
 // ─── Role & Permission ─────────────────────────────────────────────────────────
 export interface Permission {
-  id: string;
+  id: number;
   name: string;    // e.g. "products.read"
   label: string;   // e.g. "Lihat Produk"
   group: string;   // e.g. "products"
 }
 
 export interface Role {
-  id: string;
+  id: number;
   name: string;
   description: string;
   is_system: boolean;

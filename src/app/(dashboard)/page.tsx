@@ -30,7 +30,7 @@ function subDaysFrom(date: Date, days: number): Date {
 
 // ─── Data Fetching ─────────────────────────────────────────────────────────────
 
-function useDashboardStats(branchId: string | null) {
+function useDashboardStats(branchId: number | null) {
   return useQuery({
     queryKey: ["dashboard-stats", branchId],
     queryFn: async () => {
@@ -43,7 +43,7 @@ function useDashboardStats(branchId: string | null) {
   });
 }
 
-function useSalesChart(branchId: string | null, start: string, end: string) {
+function useSalesChart(branchId: number | null, start: string, end: string) {
   return useQuery({
     queryKey: ["sales-chart", branchId, start, end],
     queryFn: async () => {

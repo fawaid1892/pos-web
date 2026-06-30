@@ -12,7 +12,7 @@ interface ProductGridProps {
   onSelectProduct: (product: Product) => void;
 }
 
-async function fetchProducts(branchId: string | null): Promise<Product[]> {
+async function fetchProducts(branchId: number | null): Promise<Product[]> {
   const params = branchId ? `?branch_id=${branchId}` : "";
   const res = await fetch(`/api/products${params}`);
   if (!res.ok) {

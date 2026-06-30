@@ -31,7 +31,7 @@ export default function UserListPage() {
   const [editingUser, setEditingUser] = useState<User | undefined>(undefined);
 
   // Delete confirmation
-  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  const [deleteConfirmId, setDeleteConfirmId] = useState<number | null>(null);
   const [deleteConfirmName, setDeleteConfirmName] = useState<string>("");
 
   // Filter & paginate
@@ -65,7 +65,7 @@ export default function UserListPage() {
     setModalOpen(true);
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (id: number) => {
     try {
       await deleteMutation.mutateAsync(id);
     } catch {

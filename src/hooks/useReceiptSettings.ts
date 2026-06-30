@@ -11,7 +11,7 @@ interface FileTextSettingsState {
   isSaving: boolean;
   error: string | null;
 
-  fetchSettings: (branchId: string) => Promise<void>;
+  fetchSettings: (branchId: number) => Promise<void>;
   saveSettings: (data: FileTextSettingsFormData) => Promise<void>;
   updateLogo: (logoUrl: string) => void;
   clearError: () => void;
@@ -38,7 +38,7 @@ export const useFileTextSettingsStore = create<FileTextSettingsState>(
     isSaving: false,
     error: null,
 
-    fetchSettings: async (branchId: string) => {
+    fetchSettings: async (branchId: number) => {
       set({ isLoading: true, error: null });
       try {
         const response = await fetch(`/api/settings/receipt?branchId=${encodeURIComponent(branchId)}`, {

@@ -18,7 +18,7 @@ import {
 export default function RoleDetailPage() {
   const params = useParams();
   const router = useRouter();
-  const roleId = params.id as string;
+  const roleId = Number(params.id);
 
   const {
     roles,
@@ -41,7 +41,7 @@ export default function RoleDetailPage() {
   const [infoError, setInfoError] = useState<string | null>(null);
 
   // Permission state
-  const [selectedPermissionIds, setSelectedPermissionIds] = useState<Set<string>>(new Set());
+  const [selectedPermissionIds, setSelectedPermissionIds] = useState<Set<number>>(new Set());
   const [isSavingPermissions, setIsSavingPermissions] = useState(false);
   const [permError, setPermError] = useState<string | null>(null);
   const [initialLoad, setInitialLoad] = useState(true);
@@ -82,7 +82,7 @@ export default function RoleDetailPage() {
     return groups;
   }, [allPermissions]);
 
-  const togglePermission = (permId: string) => {
+  const togglePermission = (permId: number) => {
     setSelectedPermissionIds((prev) => {
       const next = new Set(prev);
       if (next.has(permId)) {

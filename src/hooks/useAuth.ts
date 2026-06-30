@@ -33,7 +33,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     if (token && userJson) {
       try {
         const user: User = JSON.parse(userJson);
-        const session: AuthSession = { user, token, activeBranchId: activeBranchId || "" };
+        const session: AuthSession = { user, token, activeBranchId: activeBranchId ? Number(activeBranchId) : 0 };
         set({ session, isAuthenticated: true });
       } catch {
         localStorage.removeItem("auth_token");
@@ -69,11 +69,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
       // If backend returns activeBranchId, store it
       if (user?.branchId) {
-        localStorage.setItem("active_branch_id", user.branchId);
+        localStorage.setItem("active_branch_id", String(user.branchId));
       }
 
       set({
-        session: { user, token, activeBranchId: user?.branchId || "" },
+        session: { user, token, activeBranchId: user?.branchId ?? 0 },
         isAuthenticated: true,
         isLoading: false,
         error: null,
@@ -131,7 +131,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
       // Update session
       set({
-        session: { user: user || get().session?.user, token: newToken, activeBranchId: user?.branchId || get().session?.activeBranchId || "" },
+        session: { user: user || get().session?.user, token: newToken, activeBranchId: user?.branchId ?? get().session?.activeBranchId ?? 0 },
         isAuthenticated: true,
       });
 

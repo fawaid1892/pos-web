@@ -23,7 +23,7 @@ export default function StockTransferPage() {
 
   const [productSearch, setProductSearch] = useState("");
   const [showProductDropdown, setShowProductDropdown] = useState(false);
-  const [selectedProductId, setSelectedProductId] = useState("");
+  const [selectedProductId, setSelectedProductId] = useState<number | null>(null);
   const [fromBranchId, setFromBranchId] = useState(activeBranch?.id || "");
   const [toBranchId, setToBranchId] = useState("");
   const [quantity, setQuantity] = useState("");
@@ -98,9 +98,9 @@ export default function StockTransferPage() {
 
     try {
       await transferMutation.mutateAsync({
-        productId: selectedProductId,
-        fromBranchId,
-        toBranchId,
+        productId: selectedProductId!,
+        fromBranchId: Number(fromBranchId),
+        toBranchId: Number(toBranchId),
         quantity: Number(quantity),
         notes: notes || undefined,
       });
@@ -110,7 +110,7 @@ export default function StockTransferPage() {
     }
   };
 
-  const handleProductSelect = (productId: string) => {
+  const handleProductSelect = (productId: number) => {
     setSelectedProductId(productId);
     setShowProductDropdown(false);
     setProductSearch("");
@@ -157,7 +157,7 @@ export default function StockTransferPage() {
                 <button
                   type="button"
                   onClick={() => {
-                    setSelectedProductId("");
+                    setSelectedProductId(null);
                     setProductSearch("");
                   }}
                   className="text-muted-foreground hover:text-foreground text-lg leading-none"

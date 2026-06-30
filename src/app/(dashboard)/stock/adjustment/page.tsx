@@ -22,7 +22,7 @@ export default function StockAdjustmentPage() {
 
   const [productSearch, setProductSearch] = useState("");
   const [showProductDropdown, setShowProductDropdown] = useState(false);
-  const [selectedProductId, setSelectedProductId] = useState("");
+  const [selectedProductId, setSelectedProductId] = useState<number | null>(null);
   const [type, setType] = useState<"in" | "out">("in");
   const [quantity, setQuantity] = useState("");
   const [notes, setNotes] = useState("");
@@ -76,7 +76,7 @@ export default function StockAdjustmentPage() {
 
     try {
       await adjustMutation.mutateAsync({
-        productId: selectedProductId,
+        productId: selectedProductId!,
         type,
         quantity: Number(quantity),
         notes: notes || undefined,
@@ -87,7 +87,7 @@ export default function StockAdjustmentPage() {
     }
   };
 
-  const handleProductSelect = (productId: string) => {
+  const handleProductSelect = (productId: number) => {
     setSelectedProductId(productId);
     setShowProductDropdown(false);
     setProductSearch("");
@@ -136,7 +136,7 @@ export default function StockAdjustmentPage() {
                 <button
                   type="button"
                   onClick={() => {
-                    setSelectedProductId("");
+                    setSelectedProductId(null);
                     setProductSearch("");
                   }}
                   className="text-muted-foreground hover:text-foreground text-lg leading-none"

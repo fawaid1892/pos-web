@@ -89,7 +89,7 @@ async function updateProduct({
   id,
   data,
 }: {
-  id: string;
+  id: number;
   data: Partial<ProductFormData>;
 }): Promise<Product> {
   const res = await fetch(`/api/products/${id}`, {
@@ -116,7 +116,7 @@ export function useUpdateProduct() {
 
 // ─── Delete product ───────────────────────────────────────────────────────────
 
-async function deleteProduct(id: string): Promise<void> {
+async function deleteProduct(id: number): Promise<void> {
   const res = await fetch(`/api/products/${id}`, { method: "DELETE" });
   if (!res.ok) {
     const err = await res.json().catch(() => ({ error: "Failed to delete product" }));

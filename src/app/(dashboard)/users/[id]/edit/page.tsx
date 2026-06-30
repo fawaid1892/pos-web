@@ -9,7 +9,7 @@ import { Edit } from "lucide-react";
 export default function EditUserPage() {
   const router = useRouter();
   const params = useParams();
-  const userId = params.id as string;
+  const userId = Number(params.id);
   const { users, fetchUsers, selectedUser, setSelectedUser } = useUsersStore();
 
   const user = users.find((u) => u.id === userId);

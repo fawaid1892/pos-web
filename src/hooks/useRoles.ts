@@ -15,11 +15,11 @@ interface RolesState {
   // Actions
   fetchRoles: () => Promise<void>;
   fetchPermissions: () => Promise<void>;
-  fetchRolePermissions: (roleId: string) => Promise<Permission[]>;
+  fetchRolePermissions: (roleId: number) => Promise<Permission[]>;
   createRole: (name: string, description: string) => Promise<Role | null>;
-  updateRole: (id: string, name: string, description: string) => Promise<void>;
-  deleteRole: (id: string) => Promise<void>;
-  setRolePermissions: (roleId: string, permissionIds: string[]) => Promise<void>;
+  updateRole: (id: number, name: string, description: string) => Promise<void>;
+  deleteRole: (id: number) => Promise<void>;
+  setRolePermissions: (roleId: number, permissionIds: number[]) => Promise<void>;
   setSelectedRole: (role: Role | null) => void;
   clearError: () => void;
 }
@@ -85,7 +85,7 @@ export const useRolesStore = create<RolesState>((set, get) => ({
     }
   },
 
-  fetchRolePermissions: async (roleId: string) => {
+  fetchRolePermissions: async (roleId: number) => {
     try {
       const response = await fetch(`/api/roles/${roleId}/permissions`, { cache: "no-store" });
       if (!response.ok) {
@@ -135,7 +135,7 @@ export const useRolesStore = create<RolesState>((set, get) => ({
     }
   },
 
-  updateRole: async (id: string, name: string, description: string) => {
+  updateRole: async (id: number, name: string, description: string) => {
     set({ isLoading: true, error: null });
     try {
       const response = await fetch(`/api/roles/${id}`, {
@@ -167,7 +167,7 @@ export const useRolesStore = create<RolesState>((set, get) => ({
     }
   },
 
-  deleteRole: async (id: string) => {
+  deleteRole: async (id: number) => {
     set({ isLoading: true, error: null });
     try {
       const response = await fetch(`/api/roles/${id}`, {
@@ -189,7 +189,7 @@ export const useRolesStore = create<RolesState>((set, get) => ({
     }
   },
 
-  setRolePermissions: async (roleId: string, permissionIds: string[]) => {
+  setRolePermissions: async (roleId: number, permissionIds: number[]) => {
     set({ isLoading: true, error: null });
     try {
       const response = await fetch(`/api/roles/${roleId}/permissions`, {

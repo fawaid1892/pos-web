@@ -54,7 +54,7 @@ export default function PromotionListPage() {
   const [statusFilter, setStatusFilter] = useState("all");
 
   // Delete confirmation
-  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  const [deleteConfirmId, setDeleteConfirmId] = useState<number | null>(null);
   const [deleteConfirmName, setDeleteConfirmName] = useState<string>("");
   const [isDeleting, setIsDeleting] = useState(false);
 
@@ -82,7 +82,7 @@ export default function PromotionListPage() {
     fetchPromotions();
   }, [fetchPromotions]);
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (id: number) => {
     setIsDeleting(true);
     try {
       const res = await fetch(`/api/promotions/${id}`, { method: "DELETE" });

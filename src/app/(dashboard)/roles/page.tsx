@@ -39,7 +39,7 @@ export default function RoleListPage() {
   const [isCreating, setIsCreating] = useState(false);
 
   // Delete confirmation
-  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  const [deleteConfirmId, setDeleteConfirmId] = useState<number | null>(null);
   const [deleteConfirmName, setDeleteConfirmName] = useState<string>("");
 
   useEffect(() => {
@@ -79,7 +79,7 @@ export default function RoleListPage() {
     }
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (id: number) => {
     await deleteRole(id);
     setDeleteConfirmId(null);
     setDeleteConfirmName("");

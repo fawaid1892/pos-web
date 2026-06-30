@@ -14,9 +14,9 @@ interface UsersState {
   // Actions
   fetchUsers: () => Promise<void>;
   createUser: (data: UserFormData) => Promise<void>;
-  updateUser: (id: string, data: Partial<UserFormData>) => Promise<void>;
-  deleteUser: (id: string) => Promise<void>;
-  getUserById: (id: string) => User | undefined;
+  updateUser: (id: number, data: Partial<UserFormData>) => Promise<void>;
+  deleteUser: (id: number) => Promise<void>;
+  getUserById: (id: number) => User | undefined;
   setSelectedUser: (user: User | null) => void;
   clearError: () => void;
 }
@@ -95,7 +95,7 @@ export const useUsersStore = create<UsersState>((set, get) => ({
     }
   },
 
-  updateUser: async (id: string, data: Partial<UserFormData>) => {
+  updateUser: async (id: number, data: Partial<UserFormData>) => {
     set({ isLoading: true, error: null });
     try {
       const response = await fetch(`/api/users/${id}`, {
@@ -126,7 +126,7 @@ export const useUsersStore = create<UsersState>((set, get) => ({
     }
   },
 
-  deleteUser: async (id: string) => {
+  deleteUser: async (id: number) => {
     set({ isLoading: true, error: null });
     try {
       const response = await fetch(`/api/users/${id}`, {
@@ -148,7 +148,7 @@ export const useUsersStore = create<UsersState>((set, get) => ({
     }
   },
 
-  getUserById: (id: string) => {
+  getUserById: (id: number) => {
     return get().users.find((u) => u.id === id);
   },
 

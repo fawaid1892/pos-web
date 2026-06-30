@@ -28,15 +28,15 @@ interface CartState {
 
   // Actions
   addItem: (item: Omit<TransactionItem, "subtotal" | "discountPercent">) => void;
-  removeItem: (productId: string) => void;
-  updateQuantity: (productId: string, quantity: number) => void;
+  removeItem: (productId: number) => void;
+  updateQuantity: (productId: number, quantity: number) => void;
   clearCart: () => void;
   setDiscountPercent: (percent: number) => void;
   setTax: (amount: number) => void;
   setVoucherDiscount: (voucher: { code: string; name: string; value: number; type: string } | null) => void;
   clearVoucher: () => void;
   /** Set per-item manual discount percent */
-  updateItemDiscount: (productId: string, discountPercent: number) => void;
+  updateItemDiscount: (productId: number, discountPercent: number) => void;
   /** Set auto-applied promotions */
   setAutoAppliedPromotions: (promotions: AppliedPromotion[]) => void;
   /** Clear auto-applied promotions */

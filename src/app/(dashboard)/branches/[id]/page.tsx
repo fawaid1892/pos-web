@@ -247,7 +247,7 @@ export default function BranchDetailPage() {
     if (branches.length === 0) fetchBranches();
     if (users.length === 0) fetchUsers();
     if (!isNewBranch) {
-      fetchBranchUsers(branchId);
+      fetchBranchUsers(Number(branchId));
     }
   }, [branchId, isNewBranch, fetchBranches, fetchUsers, fetchBranchUsers, branches.length, users.length]);
 
@@ -267,7 +267,7 @@ export default function BranchDetailPage() {
       });
       return;
     }
-    const branch = branches.find((b) => b.id === branchId);
+    const branch = branches.find((b) => b.id === Number(branchId));
     if (branch) {
       setFormData({
         code: branch.code || "",
@@ -360,7 +360,7 @@ export default function BranchDetailPage() {
         await fetchBranches();
         router.push("/branches");
       } else {
-        const result = await updateBranch(branchId, formData);
+        const result = await updateBranch(Number(branchId), formData);
         if (result) {
           // Success — stay on page
         }
@@ -374,7 +374,7 @@ export default function BranchDetailPage() {
 
   const handleDelete = async () => {
     setIsDeleting(true);
-    const success = await deleteBranch(branchId);
+    const success = await deleteBranch(Number(branchId));
     setIsDeleting(false);
     if (success) {
       router.push("/branches");
@@ -389,19 +389,19 @@ export default function BranchDetailPage() {
   const handleAssignUser = async () => {
     if (!selectedUserId) return;
     setIsAssigning(true);
-    await assignUserToBranch(branchId, selectedUserId);
+    await assignUserToBranch(Number(branchId), Number(selectedUserId));
     setIsAssigning(false);
     setSelectedUserId("");
     setAssignModalOpen(false);
   };
 
-  const handleRemoveUser = async (userId: string, userName: string) => {
+  const handleRemoveUser = async (userId: number, userName: string) => {
     if (!confirm(`Hapus user "${userName}" dari cabang ini?`)) return;
-    await removeUserFromBranch(branchId, userId);
+    await removeUserFromBranch(Number(branchId), Number(userId));
   };
 
   // ─── Loading state for page ────────────────────────────────────────────────
-  if (!isNewBranch && branches.length > 0 && !branches.find((b) => b.id === branchId)) {
+  if (!isNewBranch && branches.length > 0 && !branches.find((b) => b.id === Number(branchId))) {
     return (
       <div className="flex items-center justify-center h-full">
         <p className="text-muted-foreground">Memuat data cabang...</p>
@@ -409,7 +409,7 @@ export default function BranchDetailPage() {
     );
   }
 
-  const branch = branches.find((b) => b.id === branchId);
+  const branch = branches.find((b) => b.id === Number(branchId));
 
   return (
     <div className="h-full flex flex-col overflow-auto">

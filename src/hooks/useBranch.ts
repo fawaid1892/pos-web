@@ -15,15 +15,15 @@ interface BranchState {
   setActiveBranch: (branch: Branch) => void;
   fetchBranches: () => Promise<void>;
   createBranch: (data: BranchFormData) => Promise<Branch | null>;
-  updateBranch: (id: string, data: Partial<BranchFormData>) => Promise<Branch | null>;
-  deleteBranch: (id: string) => Promise<boolean>;
+  updateBranch: (id: number, data: Partial<BranchFormData>) => Promise<Branch | null>;
+  deleteBranch: (id: number) => Promise<boolean>;
 
   // User assignment
   branchUsers: User[];
   branchUsersLoading: boolean;
-  fetchBranchUsers: (branchId: string) => Promise<User[]>;
-  assignUserToBranch: (branchId: string, userId: string) => Promise<void>;
-  removeUserFromBranch: (branchId: string, userId: string) => Promise<void>;
+  fetchBranchUsers: (branchId: number) => Promise<User[]>;
+  assignUserToBranch: (branchId: number, userId: number) => Promise<void>;
+  removeUserFromBranch: (branchId: number, userId: number) => Promise<void>;
 
   clearError: () => void;
 }
@@ -57,7 +57,7 @@ export const useBranchStore = create<BranchState>((set, get) => ({
 
   setActiveBranch: (branch) => {
     set({ activeBranch: branch });
-    localStorage.setItem("active_branch_id", branch.id);
+    localStorage.setItem("active_branch_id", String(branch.id));
   },
 
   fetchBranches: async () => {
@@ -115,7 +115,7 @@ export const useBranchStore = create<BranchState>((set, get) => ({
     }
   },
 
-  updateBranch: async (id: string, data: Partial<BranchFormData>) => {
+  updateBranch: async (id: number, data: Partial<BranchFormData>) => {
     set({ isLoading: true, error: null });
     try {
       const response = await fetch(`/api/branches/${id}`, {
@@ -149,7 +149,7 @@ export const useBranchStore = create<BranchState>((set, get) => ({
     }
   },
 
-  deleteBranch: async (id: string) => {
+  deleteBranch: async (id: number) => {
     set({ isLoading: true, error: null });
     try {
       const response = await fetch(`/api/branches/${id}`, {
@@ -173,7 +173,7 @@ export const useBranchStore = create<BranchState>((set, get) => ({
     }
   },
 
-  fetchBranchUsers: async (branchId: string) => {
+  fetchBranchUsers: async (branchId: number) => {
     set({ branchUsersLoading: true });
     try {
       const response = await fetch(`/api/branches/${branchId}/users`, { cache: "no-store" });
@@ -193,7 +193,7 @@ export const useBranchStore = create<BranchState>((set, get) => ({
     }
   },
 
-  assignUserToBranch: async (branchId: string, userId: string) => {
+  assignUserToBranch: async (branchId: number, userId: number) => {
     set({ isLoading: true, error: null });
     try {
       const response = await fetch(`/api/branches/${branchId}/users`, {
@@ -216,7 +216,7 @@ export const useBranchStore = create<BranchState>((set, get) => ({
     }
   },
 
-  removeUserFromBranch: async (branchId: string, userId: string) => {
+  removeUserFromBranch: async (branchId: number, userId: number) => {
     set({ isLoading: true, error: null });
     try {
       const response = await fetch(`/api/branches/${branchId}/users/${userId}`, {
@@ -244,7 +244,7 @@ export const useBranchStore = create<BranchState>((set, get) => ({
 /** Map snake_case backend fields to camelCase frontend Branch type */
 function normalizeBranch(b: Record<string, unknown>): Branch {
   return {
-    id: String(b.id ?? ""),
+    id: Number(b.id ?? 0),
     name: String(b.name ?? ""),
     code: String(b.code ?? b.name ?? ""),
     address: String(b.address ?? ""),

@@ -90,7 +90,7 @@ function thirtyDaysAgoStr(): string {
 
 // ─── Data Fetching Hooks ──────────────────────────────────────────────────────
 
-function useSalesReport(branchId: string | null, start: string, end: string) {
+function useSalesReport(branchId: number | null, start: string, end: string) {
   return useQuery<SalesReport>({
     queryKey: ["reports-sales", branchId, start, end],
     queryFn: async () => {
@@ -104,7 +104,7 @@ function useSalesReport(branchId: string | null, start: string, end: string) {
   });
 }
 
-function useStockReport(branchId: string | null) {
+function useStockReport(branchId: number | null) {
   return useQuery<StockReport>({
     queryKey: ["reports-stock", branchId],
     queryFn: async () => {
@@ -116,7 +116,7 @@ function useStockReport(branchId: string | null) {
   });
 }
 
-function useProfitLossReport(branchId: string | null, start: string, end: string) {
+function useProfitLossReport(branchId: number | null, start: string, end: string) {
   return useQuery<ProfitLossReport>({
     queryKey: ["reports-profit-loss", branchId, start, end],
     queryFn: async () => {
@@ -167,7 +167,7 @@ function ExportDropdown({
   end,
   disabled,
 }: {
-  branchId: string | null;
+  branchId: number | null;
   start: string;
   end: string;
   disabled: boolean;
@@ -240,7 +240,7 @@ function SalesTab({
   start,
   end,
 }: {
-  branchId: string | null;
+  branchId: number | null;
   start: string;
   end: string;
 }) {
@@ -332,7 +332,7 @@ function SalesTab({
 
 // ─── Stock Tab ────────────────────────────────────────────────────────────────
 
-function StockTab({ branchId }: { branchId: string | null }) {
+function StockTab({ branchId }: { branchId: number | null }) {
   const { data, isLoading, error } = useStockReport(branchId);
   const [search, setSearch] = useState("");
 
@@ -452,7 +452,7 @@ function ProfitLossTab({
   start,
   end,
 }: {
-  branchId: string | null;
+  branchId: number | null;
   start: string;
   end: string;
 }) {
