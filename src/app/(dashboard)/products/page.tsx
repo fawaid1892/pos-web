@@ -37,7 +37,7 @@ export default function ProductListPage() {
     (p) =>
       (p.name || "").toLowerCase().includes(search.toLowerCase()) ||
       (p.barcode || "").toLowerCase().includes(search.toLowerCase()) ||
-      (p.sku || "").toLowerCase().includes(search.toLowerCase())
+      (p.code || "—").toLowerCase().includes(search.toLowerCase())
   );
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / ITEMS_PER_PAGE));
@@ -164,7 +164,7 @@ export default function ProductListPage() {
                     {product.barcode || "—"}
                   </td>
                   <td className="px-6 py-4 text-sm text-muted-foreground hidden lg:table-cell font-mono">
-                    {product.sku || "—"}
+                    {product.code || "—"}
                   </td>
                   <td className="px-6 py-4 text-sm font-medium">
                     {formatCurrency(product.price)}

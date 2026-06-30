@@ -13,7 +13,6 @@ const UNIT_OPTIONS = [
 
 interface FormFields {
   name: string;
-  barcode: string;
   code: string;
   unit: string;
   price: string;
@@ -45,7 +44,6 @@ export function ProductFormModal({
 
   const [form, setForm] = useState<FormFields>({
     name: "",
-    barcode: "",
     code: "",
     unit: "PCS",
     price: "",
@@ -59,8 +57,7 @@ export function ProductFormModal({
     if (mode === "edit" && product) {
       setForm({
         name: product.name || "",
-        barcode: product.barcode || "",
-        code: product.sku || "",
+        code: product.code || "",
         unit: product.unit || "PCS",
         price: String(product.price ?? ""),
         cost_price: String(product.costPrice ?? ""),
@@ -70,7 +67,6 @@ export function ProductFormModal({
     } else {
       setForm({
         name: "",
-        barcode: "",
         code: "",
         unit: "PCS",
         price: "",
@@ -98,7 +94,6 @@ export function ProductFormModal({
 
     const payload: Record<string, unknown> = {
       name: form.name.trim(),
-      barcode: form.barcode.trim() || undefined,
       code: form.code.trim() || undefined,
       unit: form.unit || "PCS",
       price: Number(form.price),
@@ -153,16 +148,6 @@ export function ProductFormModal({
         value={form.code}
         onChange={(e) => updateField("code", e.target.value)}
         error={errors.code}
-      />
-
-      {/* Barcode (opsional) */}
-      <Input
-        id="barcode"
-        label="Barcode (opsional)"
-        placeholder="Masukkan barcode"
-        value={form.barcode}
-        onChange={(e) => updateField("barcode", e.target.value)}
-        error={errors.barcode}
       />
 
       {/* Satuan */}

@@ -53,7 +53,7 @@ export interface AuthSession {
 // ─── Product ──────────────────────────────────────────────────────────────────
 export interface Product {
   id: string;
-  sku: string;
+  code: string;
   name: string;
   description?: string;
   price: number;
