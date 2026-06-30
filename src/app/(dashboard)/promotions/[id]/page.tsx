@@ -114,7 +114,7 @@ export default function PromotionDetailPage() {
       setLoadingProvince(true);
       try {
         const res = await fetch(
-          "https://emsifa.github.io/api-wilayah-indonesia/api/provinces.json"
+          "https://www.emsifa.com/api-wilayah-indonesia/api/provinces.json"
         );
         const data = await res.json();
         setProvinces(data);
@@ -137,7 +137,7 @@ export default function PromotionDetailPage() {
       setLoadingCity(true);
       try {
         const res = await fetch(
-          `https://emsifa.github.io/api-wilayah-indonesia/api/regencies/${formData.province_id}.json`
+          `https://www.emsifa.com/api-wilayah-indonesia/api/regencies/${formData.province_id}.json`
         );
         const data = await res.json();
         setCities(data);

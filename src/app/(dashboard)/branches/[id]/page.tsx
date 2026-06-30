@@ -289,7 +289,7 @@ export default function BranchDetailPage() {
       setLoadingProvince(true);
       try {
         const res = await fetch(
-          "https://emsifa.github.io/api-wilayah-indonesia/api/provinces.json"
+          "https://www.emsifa.com/api-wilayah-indonesia/api/provinces.json"
         );
         const data = await res.json();
         setProvinces(data);
@@ -312,7 +312,7 @@ export default function BranchDetailPage() {
       setLoadingCity(true);
       try {
         const res = await fetch(
-          `https://emsifa.github.io/api-wilayah-indonesia/api/regencies/${formData.province_code}.json`
+          `https://www.emsifa.com/api-wilayah-indonesia/api/regencies/${formData.province_code}.json`
         );
         const data = await res.json();
         setCities(data);
