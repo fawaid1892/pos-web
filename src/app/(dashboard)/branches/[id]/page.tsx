@@ -218,8 +218,10 @@ export default function BranchDetailPage() {
     name: "",
     address: "",
     phone: "",
-    province: "",
-    city: "",
+    province: "",       // display name (e.g. "Jawa Barat")
+    province_code: "",  // emsifa code (e.g. "32")
+    city: "",           // display name (e.g. "Bogor")
+    city_code: "",      // emsifa code (e.g. "3271")
     isActive: true,
   });
   const [isSaving, setIsSaving] = useState(false);
@@ -258,7 +260,9 @@ export default function BranchDetailPage() {
         address: "",
         phone: "",
         province: "",
+        province_code: "",
         city: "",
+        city_code: "",
         isActive: true,
       });
       return;
@@ -271,7 +275,9 @@ export default function BranchDetailPage() {
         address: branch.address || "",
         phone: branch.phone || "",
         province: branch.province || "",
+        province_code: branch.province_code || "",
         city: branch.city || "",
+        city_code: branch.city_code || "",
         isActive: branch.isActive,
       });
     }
@@ -298,7 +304,7 @@ export default function BranchDetailPage() {
 
   // ─── Fetch cities when province changes ────────────────────────────────────
   useEffect(() => {
-    if (!formData.province) {
+    if (!formData.province_code) {
       setCities([]);
       return;
     }
@@ -306,7 +312,7 @@ export default function BranchDetailPage() {
       setLoadingCity(true);
       try {
         const res = await fetch(
-          `https://emsifa.github.io/api-wilayah-indonesia/api/regencies/${formData.province}.json`
+          `https://emsifa.github.io/api-wilayah-indonesia/api/regencies/${formData.province_code}.json`
         );
         const data = await res.json();
         setCities(data);
@@ -317,7 +323,7 @@ export default function BranchDetailPage() {
       }
     }
     loadCities();
-  }, [formData.province]);
+  }, [formData.province_code]);
 
   // ─── Form handlers ─────────────────────────────────────────────────────────
   const handleChange = (
@@ -490,8 +496,17 @@ export default function BranchDetailPage() {
               </label>
               <select
                 name="province"
-                value={formData.province}
-                onChange={handleChange}
+                value={formData.province_code}
+                onChange={(e) => {
+                  const selectedProvince = provinces.find(p => p.id === e.target.value);
+                  setFormData(prev => ({
+                    ...prev,
+                    province: selectedProvince ? selectedProvince.name : "",
+                    province_code: e.target.value,
+                    city: "",
+                    city_code: "",
+                  }));
+                }}
                 className="flex h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
                 disabled={loadingProvince}
               >
@@ -513,20 +528,27 @@ export default function BranchDetailPage() {
               </label>
               <select
                 name="city"
-                value={formData.city}
-                onChange={handleChange}
+                value={formData.city_code}
+                onChange={(e) => {
+                  const selectedCity = cities.find(c => c.id === e.target.value);
+                  setFormData(prev => ({
+                    ...prev,
+                    city: selectedCity ? selectedCity.name : "",
+                    city_code: e.target.value,
+                  }));
+                }}
                 className="flex h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-                disabled={!formData.province || loadingCity}
+                disabled={!formData.province_code || loadingCity}
               >
                 <option value="">
-                  {!formData.province
+                  {!formData.province_code
                     ? "Pilih provinsi terlebih dahulu"
                     : loadingCity
                     ? "Memuat..."
                     : "Pilih Kota / Kabupaten"}
                 </option>
                 {cities.map((c) => (
-                  <option key={c.id} value={c.name}>
+                  <option key={c.id} value={c.id}>
                     {c.name}
                   </option>
                 ))}

@@ -6,7 +6,9 @@ export interface Branch {
   address: string;
   phone?: string;
   province?: string;
+  province_code?: string;
   city?: string;
+  city_code?: string;
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
@@ -18,7 +20,9 @@ export interface BranchFormData {
   address: string;
   phone?: string;
   province?: string;
+  province_code?: string;
   city?: string;
+  city_code?: string;
   isActive: boolean;
 }
 
